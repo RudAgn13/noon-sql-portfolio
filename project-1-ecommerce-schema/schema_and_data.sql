@@ -21,8 +21,8 @@ create table products (
   product_name varchar(100),
   category_l1 varchar(50),
   category_l2 varchar(50),
-  price decimal(8,2),
-  seller_id int references sellers(seller_id)
+  seller_id int references sellers(seller_id),
+  price decimal(8,2)
 );
 
 create table orders (
