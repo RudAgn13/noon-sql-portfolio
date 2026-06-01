@@ -29,7 +29,8 @@ select
     count(o.order_id) orders_count, 
     round(100*count(o.order_id)/(select count(order_id) from orders)::decimal,2) percentage_of_total
 from orders o
-group by o.status;
+group by o.status
+order by percentage_of_total desc;
 
 -- METRIC 4: PIPELINE GROSS MERCHANDISE VALUE SHARE BY CATEGORY DIVISION
 with x as
@@ -45,4 +46,5 @@ select p.category_l1, coalesce(sum(x.a),0) revenue_by_category
 from products p
 left join x
 on p.product_id = x.product_id
-group by p.category_l1;
+group by p.category_l1
+order by revenue_by_category desc;
