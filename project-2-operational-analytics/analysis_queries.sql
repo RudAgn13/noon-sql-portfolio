@@ -29,7 +29,7 @@ select
   x.sales_month as "month",
   coalesce(sum(x.revenue), 0) as categoryrevenue_by_month
 from products p
-left join x on p.product_id = x.product_id
+left join x on p.product_id = x.product_id -- left join intentional: surfaces categories with no sales in a given month
 group by p.category_l1, x.sales_month
 order by p.category_l1, "month" asc;
 
