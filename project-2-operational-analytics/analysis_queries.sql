@@ -32,3 +32,17 @@ from products p
 left join x on p.product_id = x.product_id
 group by p.category_l1, x.sales_month
 order by p.category_l1, "month" asc;
+
+-- METRIC 3: AOV BY DELIVERY TYPE
+with x as
+(
+select order_id, delivery_type
+from orders
+where status = 'delivered'
+)
+select 
+	x.delivery_type,
+    round((sum(oi.quantity*oi.unit_price)/count(distinct x.order_id)),2) as aov
+from order_items oi
+join x on x.order_id = oi.order_id
+group by x.delivery_type;
