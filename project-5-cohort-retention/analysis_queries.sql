@@ -1,5 +1,5 @@
 -- TARGET DATABASE: PostgreSQL v14
--- Project 4: User Cohort Lifecycle & Retention Analytics
+-- Project 5: User Cohort Lifecycle & Retention Analytics
 
 -- METRIC 1: USER RETENTION COHORT MATRIX
 with fpd as
