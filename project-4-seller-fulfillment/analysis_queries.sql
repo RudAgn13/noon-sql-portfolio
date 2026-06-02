@@ -1,5 +1,5 @@
 -- TARGET DATABASE: PostgreSQL v14
--- Seller Fulfillment
+-- Project 4: Seller Fulfillment
 
 -- METRIC 1: SELLER REVENUE AND RETURN RATE
 with x as
