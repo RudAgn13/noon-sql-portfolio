@@ -51,3 +51,16 @@ select
 from x
 group by purchase_frequency
 
+-- METRIC 3: AVERAGE TIME BETWEEN PURCHASES (CHURN RISK)
+with x as
+(
+  select
+      customer_id,
+      order_id,
+      (lead(order_date,1) over (partition by customer_id order by order_date)-order_date) days_bw_orders
+  from orders
+  where status = 'delivered'
+)
+select
+	round(avg(days_bw_orders),2) avg_days_bw_orders
+from x
