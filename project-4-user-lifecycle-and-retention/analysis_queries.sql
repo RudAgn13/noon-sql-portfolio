@@ -33,3 +33,21 @@ select
 from cte
 group by first_delivered_order_month, month_gap
 --IMPORTANT: where month_gap=0, cohort_size tells total active users in that month. repeat customers are shown in rows where month gap>0
+
+-- METRIC 2: HIGH-VALUE USER REPEAT PURCHASE FREQUENCY
+with x as
+(
+  select
+      customer_id,
+      count(distinct order_id) purchase_frequency
+  from orders
+  where status = 'delivered' --while returned/cancelled/pending orders include brand recall, from a financial POV, we should not treat those customers as high-value returning customers
+  group by customer_id
+)
+select
+	purchase_frequency,
+    count(customer_id) num_customers,
+    round(100.0*count(customer_id)/(select count(customer_id) from x),2) percentage_customers
+from x
+group by purchase_frequency
+
