@@ -1,6 +1,7 @@
+-- TARGET DATABASE: PostgreSQL v14
+-- Seller Fulfillment
 
 -- METRIC 1: Seller Revenue and Return Rate
--- ============================================================================
 with ps as
 (
 select
