@@ -58,3 +58,5 @@ on o.order_id = oi.order_id
 where o.status = 'delivered'
 group by s.fulfillment_type;
 
+-- METRIC 3: TOP REVENUE-GENERATING SELLER PER PRODUCT CATEGORY
+
