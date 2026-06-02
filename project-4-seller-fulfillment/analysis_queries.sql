@@ -1,7 +1,7 @@
 -- TARGET DATABASE: PostgreSQL v14
 -- Seller Fulfillment
 
--- METRIC 1: Seller Revenue and Return Rate
+-- METRIC 1: SELLER REVENUE AND RETURN RATE
 with x as
 (
 select
@@ -42,7 +42,7 @@ from x
 left join y
 on x.seller_id = y.seller_id;
 
--- METRIC 2: FBN vs. Seller-Fulfilled Performance
+-- METRIC 2: FBN VS. SELLER-FULFILLED PERFORMANCE
 select
 	s.fulfillment_type,
     sum(oi.quantity*oi.unit_price) total_revenue,
@@ -57,3 +57,4 @@ join orders o
 on o.order_id = oi.order_id
 where o.status = 'delivered'
 group by s.fulfillment_type;
+
