@@ -59,4 +59,29 @@ where o.status = 'delivered'
 group by s.fulfillment_type;
 
 -- METRIC 3: TOP REVENUE-GENERATING SELLER PER PRODUCT CATEGORY
-
+with x as
+(
+select
+	s.seller_id,
+  	s.seller_name,
+    p.category_l1,
+    sum(oi.quantity*oi.unit_price) revenue,
+  	dense_rank() over (partition by p.category_l1 order by sum(oi.quantity*oi.unit_price) desc) as rank
+from order_items oi
+join orders o
+on oi.order_id = o.order_id
+join products p
+on p.product_id = oi.product_id
+join sellers s
+on s.seller_id = p.seller_id
+where o.status = 'delivered'
+group by p.category_l1, s.seller_id, s.seller_name
+order by revenue desc
+)
+select
+	seller_id,
+    seller_name,
+    category_l1,
+    revenue
+from x
+where rank = 1;
