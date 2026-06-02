@@ -2,32 +2,20 @@
 -- Seller Fulfillment
 
 -- METRIC 1: Seller Revenue and Return Rate
-with ps as
+with x as
 (
 select
-    p.product_id,
     s.seller_id,
     s.seller_name,
-    s.fulfillment_type
-from sellers s
-join products p
-  on s.seller_id = p.seller_id
-)
-, x as
-(
-select
-    ps.seller_id,
-    ps.seller_name,
-    ps.fulfillment_type,
+    s.fulfillment_type,
     sum(oi.quantity*oi.unit_price) total_revenue,
     count(distinct oi.order_id) cnt
-from ps
-join order_items oi
-on ps.product_id = oi.product_id
-join orders o
-on o.order_id = oi.order_id
+from sellers s
+join products p on s.seller_id = p.seller_id
+join order_items oi on p.product_id = oi.product_id
+join orders o on o.order_id = oi.order_id
 where o.status = 'delivered'
-group by ps.seller_id, ps.seller_name, ps.fulfillment_type
+group by s.seller_id, s.seller_name, s.fulfillment_type
 )
 , y as
 (
