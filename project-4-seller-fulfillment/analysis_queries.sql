@@ -41,3 +41,19 @@ select
 from x
 left join y
 on x.seller_id = y.seller_id;
+
+-- METRIC 2: FBN vs. Seller-Fulfilled Performance
+select
+	s.fulfillment_type,
+    sum(oi.quantity*oi.unit_price) total_revenue,
+    count(distinct oi.order_id) num_orders,
+    round(avg(s.rating),2) avg_rating
+from sellers s
+join products p
+on p.seller_id = s.seller_id
+join order_items oi
+on oi.product_id = p.product_id
+join orders o
+on o.order_id = oi.order_id
+where o.status = 'delivered'
+group by s.fulfillment_type;
