@@ -43,11 +43,27 @@ left join y
 on x.seller_id = y.seller_id;
 
 -- METRIC 2: FBN VS. SELLER-FULFILLED PERFORMANCE
+with y as
+(
+select 
+  s.fulfillment_type,
+  count(distinct oi.order_id) ct
+from orders o
+join order_items oi
+on oi.order_id = o.order_id
+join products p
+on p.product_id = oi.product_id
+join sellers s
+on s.seller_id = p.seller_id
+where o.status = 'returned'
+group by s.fulfillment_type
+)
 select
 	s.fulfillment_type,
     sum(oi.quantity*oi.unit_price) total_revenue,
     count(distinct oi.order_id) num_orders,
-    round(avg(s.rating),2) avg_rating
+    round(avg(s.rating),2) avg_rating,
+    round(100.0*coalesce(y.ct,0)/(count(distinct o.order_id)+coalesce(y.ct,0)),2) return_pctg
 from sellers s
 join products p
 on p.seller_id = s.seller_id
@@ -55,8 +71,10 @@ join order_items oi
 on oi.product_id = p.product_id
 join orders o
 on o.order_id = oi.order_id
+left join y
+on s.fulfillment_type = y.fulfillment_type
 where o.status = 'delivered'
-group by s.fulfillment_type;
+group by s.fulfillment_type, y.ct;
 
 -- METRIC 3: TOP REVENUE-GENERATING SELLER PER PRODUCT CATEGORY
 with x as
@@ -76,7 +94,6 @@ join sellers s
 on s.seller_id = p.seller_id
 where o.status = 'delivered'
 group by p.category_l1, s.seller_id, s.seller_name
-order by revenue desc
 )
 select
 	seller_id,
@@ -84,4 +101,5 @@ select
     category_l1,
     revenue
 from x
-where rank = 1;
+where rank = 1
+order by category_l1;
