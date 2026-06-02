@@ -56,9 +56,9 @@ with x as
   on x.order_id = oi.order_id
   group by x.full_name
 )
-
 select
 	full_name,
-    dense_rank() over (order by revenue desc) customer_rank_by_revenue
+    dense_rank() over (order by revenue desc) customer_rank_by_revenue,
+    revenue
 from cte
 order by customer_rank_by_revenue
