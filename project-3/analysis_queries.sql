@@ -35,3 +35,30 @@ select
 from x
 order by "month" asc;
 
+-- METRIC 3: CUSTOMER RANK BY REVENUE
+with x as
+(
+  select
+      c.full_name,
+      o.order_id
+  from customers c
+  join orders o
+  on c.customer_id = o.customer_id
+  where o.status ='delivered'
+)
+, cte as
+(
+  select
+      x.full_name,
+      sum(oi.quantity*oi.unit_price) revenue
+  from x
+  join order_items oi
+  on x.order_id = oi.order_id
+  group by x.full_name
+)
+
+select
+	full_name,
+    dense_rank() over (order by revenue desc) customer_rank_by_revenue
+from cte
+order by customer_rank_by_revenue
