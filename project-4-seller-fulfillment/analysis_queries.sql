@@ -63,7 +63,8 @@ select
     sum(oi.quantity*oi.unit_price) total_revenue,
     count(distinct oi.order_id) num_orders,
     round(avg(s.rating),2) avg_rating,
-    round(100.0*coalesce(y.ct,0)/(count(distinct o.order_id)+coalesce(y.ct,0)),2) return_pctg
+    round(100.0*coalesce(max(y.ct),0)/(count(distinct o.order_id)+coalesce(max(y.ct),0)),2) return_pctg
+	--using max for y.ct to not have to use it in group by. this does not affect anything because there is EXACTLY one value of y.ct per fulfillment type.
 from sellers s
 join products p
 on p.seller_id = s.seller_id
@@ -74,7 +75,7 @@ on o.order_id = oi.order_id
 left join y
 on s.fulfillment_type = y.fulfillment_type
 where o.status = 'delivered'
-group by s.fulfillment_type, y.ct;
+group by s.fulfillment_type;
 
 -- METRIC 3: TOP REVENUE-GENERATING SELLER PER PRODUCT CATEGORY
 with x as
