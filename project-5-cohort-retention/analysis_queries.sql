@@ -31,7 +31,7 @@ select
     (((extract(year from order_month) - extract(year from first_delivered_order_month))*12 + extract(month from order_month) - extract(month from first_delivered_order_month))) month_gap,
     count(distinct customer_id) cohort_size
 from cte
-group by first_delivered_order_month, month_gap
+group by first_delivered_order_month, month_gap;
 --IMPORTANT: where month_gap=0, cohort_size tells total active users in that month. repeat customers are shown in rows where month gap>0
 
 -- METRIC 2: HIGH-VALUE USER REPEAT PURCHASE FREQUENCY
@@ -49,7 +49,7 @@ select
     count(customer_id) num_customers,
     round(100.0*count(customer_id)/(select count(customer_id) from x),2) percentage_customers
 from x
-group by purchase_frequency
+group by purchase_frequency;
 
 -- METRIC 3: AVERAGE TIME BETWEEN PURCHASES (CHURN RISK)
 with x as
@@ -63,4 +63,4 @@ with x as
 )
 select
 	round(avg(days_bw_orders),2) avg_days_bw_orders
-from x
+from x;
