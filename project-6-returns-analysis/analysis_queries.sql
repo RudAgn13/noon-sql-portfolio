@@ -33,3 +33,35 @@ select
 from rt_prod r
 right join dlv_prod d on r.product_id = d.product_id;
 
+-- METRIC 2: RETURN RATE BY CATEGORY WITH A CASE WHEN FLAG
+with rt_prod as
+(
+select
+    p.category_l1,
+    count(distinct o.order_id) ct
+from products p
+join order_items oi on p.product_id = oi.product_id
+join orders o on oi.order_id = o.order_id
+where o.status = 'returned'
+group by p.category_l1
+)
+, dlv_prod as
+(
+select
+    p.category_l1,
+    count(distinct o.order_id) ct
+from products p
+join order_items oi on p.product_id = oi.product_id
+join orders o on oi.order_id = o.order_id
+where o.status = 'delivered'
+group by p.category_l1
+)
+select
+	dlv.category_l1,
+    coalesce(round(100.0*coalesce(rt.ct, 0)/(coalesce(rt.ct, 0)+dlv.ct),2),0) rt_pctg,
+    case 
+        when round(100.0 * coalesce(rt.ct, 0)/(coalesce(rt.ct, 0)+dlv.ct), 2)>10 then 'High Risk'
+        else 'Normal'
+    end risk_status
+from dlv_prod dlv
+left join rt_prod rt on dlv.category_l1 = rt.category_l1;
