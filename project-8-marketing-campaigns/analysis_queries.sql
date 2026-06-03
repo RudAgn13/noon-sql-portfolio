@@ -1,0 +1,2 @@
+-- TARGET DATABASE: PostgreSQL v14
+-- Project 8: Marketing & Campaign Effectiveness
