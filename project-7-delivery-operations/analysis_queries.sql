@@ -34,7 +34,7 @@ group by o.order_id, o.delivery_type, o.country
 select
 	delivery_type,
     country,
-    round(avg(order_amount),2)
+    round(avg(order_amount),2) avg_order_value
 from cte
 group by country, delivery_type
 order by country, delivery_type;
@@ -55,4 +55,5 @@ select
 	delivery_type,
     order_month,
     round(100.0*(num_orders-lags)/lags,2) MoM_growth
-from counts;
+from counts
+order by delivery_type, order_month;
