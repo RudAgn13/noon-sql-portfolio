@@ -18,3 +18,23 @@ select
     round(100.0*sum(case when status = 'cancelled' then 1 else 0 end)/count(distinct order_id),2) cancellation_rate
 from orders
 group by delivery_type;
+
+-- METRIC 3: AVERAGE ORDER VALUE BY DELIVERY TYPE AND COUNTRY
+with cte as
+(
+select
+	o.order_id,
+	o.delivery_type,
+    o.country,
+    round(sum(oi.quantity*oi.unit_price),2) order_amount
+from order_items oi
+join orders o on o.order_id = oi.order_id
+group by o.order_id, o.delivery_type, o.country
+)
+select
+	delivery_type,
+    country,
+    round(avg(order_amount),2)
+from cte
+group by country, delivery_type
+order by country, delivery_type;
