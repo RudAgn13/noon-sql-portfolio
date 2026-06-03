@@ -38,3 +38,21 @@ select
 from cte
 group by country, delivery_type
 order by country, delivery_type;
+
+-- METRIC 4: MONTH-OVER-MONTH ORDER VOLUME TREND BY DELIVERY TYPE
+with counts as
+(
+select
+    delivery_type,
+    date_trunc('month', order_date) order_month,
+    count(distinct order_id) num_orders,
+  	lag(count(distinct order_id),1) over (partition by delivery_type order by date_trunc('month', order_date)) lags
+from orders
+group by delivery_type, date_trunc('month', order_date)
+)
+
+select
+	delivery_type,
+    order_month,
+    round(100.0*(num_orders-lags)/lags,2) MoM_growth
+from counts;
