@@ -11,3 +11,10 @@ from orders o
 join order_items oi on o.order_id = oi.order_id
 group by o.delivery_type
 order by revenue desc;
+
+-- METRIC 2: CANCELLATION RATE BY DELIVERY TYPE
+select
+	delivery_type,
+    round(100.0*sum(case when status = 'cancelled' then 1 else 0 end)/count(distinct order_id),2) cancellation_rate
+from orders
+group by delivery_type;
