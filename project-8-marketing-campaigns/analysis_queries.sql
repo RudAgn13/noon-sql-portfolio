@@ -96,3 +96,25 @@ from tagged_cust
 group by customer_type;
 
 -- METRIC 4: DEMAND PULL-FORWARD SIGNAL
+with cte as
+(
+select
+	date_trunc('month', o.order_date) order_month,
+	sum(oi.quantity*oi.unit_price) revenue_by_month,
+    count(distinct o.order_id) volume_by_month
+    --lag(sum(oi.quantity*oi.unit_price),1)) over (partition by date_trunc('month', o.order_date))
+from order_items oi
+join orders o on o.order_id = oi.order_id
+where date_trunc('month', o.order_date) in ('2024-09-01','2024-10-01','2024-11-01','2024-12-01') and o.status = 'delivered'
+group by date_trunc('month', o.order_date)
+order by order_month
+)
+select
+	order_month,
+    revenue_by_month,
+    round((100.0*(revenue_by_month-lag(revenue_by_month,1) over (order by order_month))/lag(revenue_by_month,1) over (order by order_month)),2) revenue_growth,
+    volume_by_month,
+    round((100.0*(volume_by_month-lag(volume_by_month,1) over (order by order_month))/lag(volume_by_month,1) over (order by order_month)),2) volume_growth
+from cte
+order by order_month desc
+limit 3;
