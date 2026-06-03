@@ -35,7 +35,7 @@ select
 from orders o
 join order_items oi on o.order_id = oi.order_id
 join products p on oi.product_id = p.product_id
-where o.order_date < '2024-11-01' or o.order_date > '2024-11-30'
+where o.order_date < '2024-11-01' or o.order_date > '2024-11-30' and o.status = 'delivered'
 group by p.category_l1, date_trunc('month', o.order_date)
 order by p.category_l1, sales_month
 ) 
@@ -48,7 +48,7 @@ select
 from orders o
 join order_items oi on o.order_id = oi.order_id
 join products p on oi.product_id = p.product_id
-where date_trunc('month', o.order_date) = '2024-11-01'
+where date_trunc('month', o.order_date) = '2024-11-01' and o.status = 'delivered'
 group by p.category_l1, date_trunc('month', o.order_date)
 order by sales_month
 )
