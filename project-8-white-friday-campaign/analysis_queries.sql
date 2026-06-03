@@ -1,5 +1,5 @@
 -- TARGET DATABASE: PostgreSQL v14
--- Project 8: Marketing & Campaign Effectiveness
+-- Project 8: White Friday Campaign Effectiveness
 
 -- METRIC 1: PRE, DURING, AND POST CAMPAIGN REVENUE COMPARISON
 select
