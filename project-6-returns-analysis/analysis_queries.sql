@@ -29,7 +29,7 @@ group by p.product_id, p.product_name
 select
 	  d.product_id,
     d.product_name,
-    coalesce(round(100*(coalesce(r.ct, 0)/(d.ct+coalesce(r.ct, 0))),2),0) rt_to_dlv_pctg
+    round(100*(coalesce(r.ct, 0)/(d.ct+coalesce(r.ct, 0))),2) rt_to_dlv_pctg
 from rt_prod r
 right join dlv_prod d on r.product_id = d.product_id;
 
@@ -72,7 +72,7 @@ with rt_reason as
 select
 	p.product_name,
 	r.reason,
-    count(distinct oi.order_id) no_of_items,
+    count(oi.quantity) no_of_items,
     sum(oi.unit_price*oi.quantity) revenue_lost,
     dense_rank() over (partition by p.product_name order by sum(oi.unit_price*oi.quantity) desc) reason_rank
 from products p
@@ -87,3 +87,11 @@ select
 from rt_reason
 where reason_rank = 1
 order by revenue_lost desc;
+
+-- METRIC 4: PLATFORM-WISE RETURN REASON DISTRIBUTION
+select
+	reason,
+    count(reason) occurences,
+    round(100.0*count(reason)/(select count(distinct return_id) from returns),2) pctg
+from returns
+group by reason;
