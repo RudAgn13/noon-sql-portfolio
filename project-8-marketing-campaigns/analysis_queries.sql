@@ -65,3 +65,34 @@ select
 	round(100.0*(cd.revenue-nca.avg_revenue)/nca.avg_revenue,2) uplift_pctg
 from non_campaign_average nca
 join campaign_data cd on nca.category_l1 = cd.category_l1;
+
+-- METRIC 3: NEW VS. RETURNING CUSTOMER SPLIT DURING CAMPAIGN
+with pre_camp_cust as
+(
+select
+	distinct customer_id
+from orders
+where order_date < '2024-11-01'
+)
+, tagged_cust as
+(
+select
+	distinct (o.customer_id),
+    case
+    	when pcc.customer_id is null then 'new'
+        else 'repeat'
+    end customer_type
+from orders o
+left join pre_camp_cust pcc on o.customer_id = pcc.customer_id
+--it doesn't matter if the columns joint table contains customers who bought previously, but did not buy in november
+where o.order_date >= '2024-11-01' and o.order_date <= '2024-11-30'
+order by o.customer_id
+)
+select
+	customer_type,
+    count(customer_id) num,
+    round(100.0*count(customer_id)/(select count(customer_id) from tagged_cust),2) pctg
+from tagged_cust
+group by customer_type;
+
+-- METRIC 4: DEMAND PULL-FORWARD SIGNAL
