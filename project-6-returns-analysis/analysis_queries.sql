@@ -65,3 +65,25 @@ select
     end risk_status
 from dlv_prod dlv
 left join rt_prod rt on dlv.category_l1 = rt.category_l1;
+
+-- METRIC 3: MOST COMMON RETURN REASONS AND FINANCIAL IMPACT
+with rt_reason as
+(
+select
+	p.product_name,
+	r.reason,
+    count(distinct oi.order_id) no_of_items,
+    sum(oi.unit_price*oi.quantity) revenue_lost,
+    dense_rank() over (partition by p.product_name order by sum(oi.unit_price*oi.quantity) desc) reason_rank
+from products p
+join returns r on p.product_id = r.product_id
+join order_items oi on r.order_id = oi.order_id and r.product_id = oi.product_id
+group by p.product_name, r.reason
+)
+select
+	product_name,
+    reason top_reason_for_returns,
+    revenue_lost
+from rt_reason
+where reason_rank = 1
+order by revenue_lost desc;
