@@ -61,4 +61,4 @@ select
     dense_rank() over (order by revenue desc) customer_rank_by_revenue,
     revenue
 from cte
-order by customer_rank_by_revenue
+order by customer_rank_by_revenue;
