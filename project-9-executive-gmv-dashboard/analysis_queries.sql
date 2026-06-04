@@ -73,5 +73,18 @@ left join answer a on m.country = a.country and m.category_l1 = a.category_l1
 order by m.country, a.gmv desc;
 
 --METRIC 4: FULL SELLER SCORECARD
+select
+	s.seller_id,
+    s.fulfillment_type,
+    sum(case when o.status = 'delivered' then oi.quantity*oi.unit_price else 0 end) total_revenue,
+    round(100.0*count(distinct case when o.status='returned' then o.order_id else null end)/count(distinct o.order_id),2) return_rate,
+    round(s.rating,2) average_rating,
+    count(distinct o.order_id) order_count,
+    dense_rank() over (partition by fulfillment_type order by sum(case when o.status = 'delivered' then oi.quantity*oi.unit_price else 0 end) desc) rank_by_fulfillment_type
+from sellers s
+join products p on s.seller_id = p.seller_id
+join order_items oi on p.product_id = oi.product_id
+join orders o on oi.order_id = o.order_id
+group by s.seller_id, s.fulfillment_type, s.rating;
 
 --METRIC 5: CUSTOMER LIFETIME VALUE SEGMENTS
