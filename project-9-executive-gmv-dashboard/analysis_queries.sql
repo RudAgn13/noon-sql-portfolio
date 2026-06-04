@@ -1,5 +1,5 @@
-
-
+--- TARGET DATABASE: PostgreSQL v14
+-- Project 9: Executive GMV Dashboard
 
 -- METRIC 1: OVERALL BUSINESS HEALTH SUMMARY
 select
