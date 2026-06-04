@@ -30,3 +30,48 @@ select
     revenue,
     round(avg(revenue) over (order by order_month rows between 2 preceding and current row),2) three_mth_rolling_avg
 from monthly_revenue;
+
+--METRIC 3: COUNTRY X CATEGORY GMV MATRIX
+with countries as
+(
+  select
+  	distinct country
+  from orders
+)
+, categories as
+(
+  select
+  	distinct category_l1
+  from products
+)
+, matrix as
+(
+  select
+  	co.country,
+  	ca.category_l1
+  from countries co
+  cross join categories ca
+)
+, answer as
+(
+  select
+	o.country,
+    p.category_l1,
+    coalesce(sum(oi.quantity*oi.unit_price),0) gmv
+from orders o
+join order_items oi on o.order_id = oi.order_id
+join products p on oi.product_id = p.product_id
+group by o.country, p.category_l1
+order by o.country, p.category_l1 
+)
+select
+	m.country,
+    m.category_l1,
+    coalesce(a.gmv,0.00) gmv
+from matrix m
+left join answer a on m.country = a.country and m.category_l1 = a.category_l1
+order by m.country, a.gmv desc;
+
+--METRIC 4: FULL SELLER SCORECARD
+
+--METRIC 5: CUSTOMER LIFETIME VALUE SEGMENTS
