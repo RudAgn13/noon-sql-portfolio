@@ -88,3 +88,24 @@ join orders o on oi.order_id = o.order_id
 group by s.seller_id, s.fulfillment_type, s.rating;
 
 --METRIC 5: CUSTOMER LIFETIME VALUE SEGMENTS
+with cte as
+(
+select
+	o.customer_id,
+    sum(case when o.status='delivered' then oi.quantity*oi.unit_price else 0 end) revenue,
+    case 
+    	when sum(case when o.status='delivered' then oi.quantity*oi.unit_price else 0 end) <10000 then 'Low'
+        when sum(case when o.status='delivered' then oi.quantity*oi.unit_price else 0 end) >20000 then 'High'
+        else 'Mid'
+    end segment
+from orders o
+join order_items oi on o.order_id = oi.order_id
+group by o.customer_id
+)
+select
+	segment,
+    sum(revenue) revenue_by_segment,
+    count(customer_id) customer_volume_by_segment,
+    round(avg(revenue),2) avg_spend_per_customer_by_segment
+from cte
+group by segment;
