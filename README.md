@@ -1,8 +1,9 @@
-# Noon SQL Portfolio
+# E-Commerce SQL Portfolio
 
 A collection of nine end-to-end SQL projects built on a custom PostgreSQL database 
 modelled after Noon's e-commerce marketplace. Each project answers a real business 
-question that a data analyst at a marketplace like Noon would be expected to tackle.
+question that a data analyst at a marketplace like Noon or Amazon would be expected 
+to tackle.
 
 Built as part of my preparation for a data analyst role, with the goal of demonstrating 
 not just SQL syntax but analytical thinking — knowing which question to ask, how to 
