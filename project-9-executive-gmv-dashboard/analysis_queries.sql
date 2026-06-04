@@ -70,7 +70,7 @@ select
     coalesce(a.gmv,0.00) gmv
 from matrix m
 left join answer a on m.country = a.country and m.category_l1 = a.category_l1
-order by m.country, a.gmv desc;
+order by m.country, m.category_l1 desc;
 
 --METRIC 4: FULL SELLER SCORECARD
 select
@@ -94,8 +94,8 @@ select
 	o.customer_id,
     sum(case when o.status='delivered' then oi.quantity*oi.unit_price else 0 end) revenue,
     case 
-    	when sum(case when o.status='delivered' then oi.quantity*oi.unit_price else 0 end) <10000 then 'Low'
-        when sum(case when o.status='delivered' then oi.quantity*oi.unit_price else 0 end) >20000 then 'High'
+    	when sum(case when o.status='delivered' then oi.quantity*oi.unit_price else 0 end) < 10000 then 'Low'
+        when sum(case when o.status='delivered' then oi.quantity*oi.unit_price else 0 end) >= 20000 then 'High'
         else 'Mid'
     end segment
 from orders o
