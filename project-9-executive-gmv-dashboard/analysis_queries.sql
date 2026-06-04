@@ -13,3 +13,20 @@ select
 from orders o
 join order_items oi on o.order_id = oi.order_id
 join products p on oi.product_id = p.product_id;
+
+--METRIC 2: ROLLING 3-MONTH REVENUE AVERAGE
+with monthly_revenue as
+(
+select
+	date_trunc('month', o.order_date) order_month,
+    sum(oi.quantity*oi.unit_price) revenue
+from orders o
+join order_items oi on o.order_id = oi.order_id
+where o.status = 'delivered'
+group by date_trunc('month', o.order_date)
+)
+select
+	order_month,
+    revenue,
+    round(avg(revenue) over (order by order_month rows between 2 preceding and current row),2) three_mth_rolling_avg
+from monthly_revenue;
