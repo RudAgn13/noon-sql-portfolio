@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce SQL Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--border:#2a2a2a;--accent:#e8ff47;--accent2:#ff6b35;--accent3:#00d4ff;--text:#f0f0f0;--muted:#888;--muted2:#444;--code:#0e0e0e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;line-height:1.6;overflow-x:hidden}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 60px;border-bottom:1px solid var(--border)}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:32px}
+h1{font-family:'DM Serif Display',serif;font-size:clamp(48px,8vw,100px);line-height:0.95;letter-spacing:-2px;margin-bottom:40px}
+h1 em{font-style:italic;color:var(--accent)}
+.hero-desc{max-width:560px;color:var(--muted);font-size:16px;line-height:1.8;margin-bottom:48px}
+.hero-meta{display:flex;gap:48px;flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:4px}
+.meta-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.meta-value{font-size:15px;font-weight:700}
+.toc{padding:28px 60px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toc-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:12px}
+.toc-link{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:2px;transition:all .2s;white-space:nowrap}
+.toc-link:hover{color:var(--accent);border-color:var(--accent)}
+.tech-bar{padding:18px 60px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;gap:28px;align-items:center;flex-wrap:wrap}
+.tech-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.tech-pill{display:flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:11px}
+.td{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.td.o{background:var(--accent2)}.td.b{background:var(--accent3)}.td.p{background:#a78bfa}
+.tdesc{font-size:11px;color:var(--muted)}
+.proj{border-bottom:1px solid var(--border);padding:72px 60px}
+.proj:nth-child(even){background:var(--surface)}
+.proj-hdr{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-bottom:56px;align-items:start}
+.proj-num{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:16px}
+.proj-title{font-family:'DM Serif Display',serif;font-size:clamp(24px,3.5vw,42px);line-height:1.1;letter-spacing:-1px;margin-bottom:20px}
+.proj-q{font-size:14px;color:var(--muted);line-height:1.8;border-left:2px solid var(--accent);padding-left:16px;font-style:italic}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--border);color:var(--muted);border-radius:2px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.mb{background:var(--code);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.mb.fw{grid-column:1/-1}
+.mh{padding:18px 22px 14px;border-bottom:1px solid var(--border)}
+.mt{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.md{font-size:12px;color:var(--muted);line-height:1.6}
+.ca{padding:22px;border-bottom:1px solid var(--border);min-height:220px;max-height:340px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+canvas{max-width:100%}
+.qt{width:100%;background:transparent;border:none;border-top:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 22px;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;transition:color .2s}
+.qt:hover{color:var(--text)}
+.qi{transition:transform .2s}
+.qt.open .qi{transform:rotate(180deg)}
+.qc{display:none;padding:18px 22px;border-top:1px solid var(--border);overflow-x:auto;background:#060606}
+.qc.vis{display:block}
+pre{font-family:'DM Mono',monospace;font-size:11px;line-height:1.9;color:#8899aa;white-space:pre}
+.kw{color:#e8ff47}.fn{color:#00d4ff}.st{color:#ff6b35}.cm{color:#444;font-style:italic}
+.to{overflow-x:auto}
+.tbl-note{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);padding:8px 13px;border-bottom:1px solid var(--border);letter-spacing:1px;text-transform:uppercase}
+table.dt{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:11px}
+table.dt th{text-align:left;padding:9px 13px;border-bottom:1px solid var(--border);color:var(--accent);text-transform:uppercase;letter-spacing:1px;font-size:10px;white-space:nowrap;background:#080808}
+table.dt td{padding:8px 13px;border-bottom:1px solid #1a1a1a;color:var(--muted);white-space:nowrap}
+table.dt tr:last-child td{border-bottom:none}
+table.dt tr:hover td{color:var(--text)}
+.sandbox{padding:72px 60px;background:#050505;border-bottom:1px solid var(--border)}
+.sb-title{font-family:'DM Serif Display',serif;font-size:clamp(24px,3vw,38px);margin-bottom:12px}
+.sb-desc{color:var(--muted);font-size:14px;line-height:1.8;max-width:600px;margin-bottom:32px}
+.sbgrid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.sbia{background:var(--code);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.sblbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:13px 18px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+textarea.sbp{width:100%;background:#060606;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:16px 18px;resize:vertical;min-height:180px;line-height:1.8}
+textarea.sbp:focus{outline:none}
+.col-inputs{padding:10px 18px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.cig{display:flex;flex-direction:column;gap:3px}
+.cil{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.ci{font-family:'DM Mono',monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:2px;width:56px}
+.ci:focus{outline:none;border-color:var(--accent)}
+.ci.wide{width:130px}
+.sbact{padding:10px 18px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bup{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;border:none;padding:7px 14px;cursor:pointer;border-radius:2px;font-weight:600;transition:opacity .2s}
+.bup:hover{opacity:.85}
+.bcl{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;background:transparent;color:var(--muted);border:1px solid var(--border);padding:7px 14px;cursor:pointer;border-radius:2px;transition:all .2s}
+.bcl:hover{color:var(--text);border-color:var(--muted)}
+.us{font-family:'DM Mono',monospace;font-size:10px;color:#22c55e;display:none;align-items:center;gap:4px}
+.us.v{display:flex}
+.sd{width:5px;height:5px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sbca{background:var(--code);border:1px solid var(--border);border-radius:4px;overflow:hidden;min-height:280px;display:flex;flex-direction:column}
+.sbci{flex:1;padding:18px;display:flex;align-items:center;justify-content:center}
+.sbcc{padding:10px 18px;border-top:1px solid var(--border);display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.stb{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 10px;cursor:pointer;border-radius:2px;transition:all .2s}
+.stb:hover,.stb.active{border-color:var(--accent);color:var(--accent)}
+.sbhint{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);padding:8px 18px;border-top:1px solid var(--border);line-height:1.6}
+.footer{padding:56px 60px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:28px;border-top:1px solid var(--border)}
+.fl{font-family:'DM Serif Display',serif;font-size:20px;line-height:1.5}
+.fr{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:2;text-align:right}
+.cp{text-align:center;color:var(--muted2)}
+.cp-icon{font-size:26px;margin-bottom:10px;opacity:0.25}
+.cp p{font-family:'DM Mono',monospace;font-size:11px}
+@media(max-width:900px){.hero,.proj,.toc,.tech-bar,.footer,.sandbox{padding:44px 20px}.proj-hdr,.mgrid,.sbgrid{grid-template-columns:1fr;gap:18px}.mb.fw{grid-column:1}h1{font-size:42px}.hero-meta{gap:20px}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.hero>*{animation:fadeUp .5s ease both}
+.eyebrow{animation-delay:.1s}h1{animation-delay:.2s}.hero-desc{animation-delay:.3s}.hero-meta{animation-delay:.4s}
+</style>
+</head>
+<body>
+<section class="hero">
+  <p class="eyebrow">SQL Portfolio · E-Commerce Analytics · PostgreSQL v14</p>
+  <h1>Nine projects.<br><em>One database.</em><br>Real answers.</h1>
+  <p class="hero-desc">A complete SQL analytics portfolio built on a custom marketplace database modelled after Noon's e-commerce operations across UAE, KSA, and Egypt. Every metric answers a real business question.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><span class="meta-label">Projects</span><span class="meta-value">09</span></div>
+    <div class="meta-item"><span class="meta-label">Database</span><span class="meta-value">PostgreSQL v14</span></div>
+    <div class="meta-item"><span class="meta-label">Tables</span><span class="meta-value">6</span></div>
+    <div class="meta-item"><span class="meta-label">Orders</span><span class="meta-value">60+</span></div>
+    <div class="meta-item"><span class="meta-label">Markets</span><span class="meta-value">UAE · KSA · Egypt</span></div>
+  </div>
+</section>
+<nav class="toc">
+  <span class="toc-lbl">Jump to</span>
+  <a class="toc-link" href="#p1">01 Schema Design</a>
+  <a class="toc-link" href="#p2">02 Sales Dashboard</a>
+  <a class="toc-link" href="#p3">03 Window Functions</a>
+  <a class="toc-link" href="#p4">04 Seller Fulfillment</a>
+  <a class="toc-link" href="#p5">05 Cohort Retention</a>
+  <a class="toc-link" href="#p6">06 Returns Analysis</a>
+  <a class="toc-link" href="#p7">07 Delivery Operations</a>
+  <a class="toc-link" href="#p8">08 Campaign Analysis</a>
+  <a class="toc-link" href="#p9">09 GMV Dashboard</a>
+  <a class="toc-link" href="#sandbox">⬡ Sandbox</a>
+</nav>
+<div class="tech-bar">
+  <span class="tech-lbl">Charting Stack</span>
+  <span class="tech-pill"><span class="td"></span>Chart.js<span class="tdesc"> — renders charts from JS arrays in browser</span></span>
+  <span class="tech-pill"><span class="td o"></span>PapaParse<span class="tdesc"> — parses tab-separated output</span></span>
+  <span class="tech-pill"><span class="td b"></span>GitHub Pages<span class="tdesc"> — hosts static HTML, zero backend</span></span>
+  <span class="tech-pill"><span class="td p"></span>Vanilla JS<span class="tdesc"> — data hardcoded, charts render on load</span></span>
+</div>
+
+<!-- DATA -->
+<script>
+const DATA = {
+  p1m1: { labels:['UAE','KSA','Egypt'], values:[104173,37779,15520] },
+  p1m2: { labels:['iPhone 15 Pro','Samsung 55" QLED TV','Samsung Galaxy S24','PS5 Console','Canon EOS Camera'], values:[36792,31794,27992,13194,12796] },
+  p1m3: { labels:['delivered','cancelled','returned'], values:[86.67,6.67,6.67] },
+  p1m4: { labels:['Electronics','Fashion','Home Appliances'], values:[145451,6630,5391] },
+
+  p2m1: {
+    labels:['Jan 2024','Feb 2024','Mar 2024','Apr 2024','May 2024','Jun 2024','Jul 2024','Aug 2024','Sep 2024','Oct 2024','Nov 2024','Dec 2024'],
+    values:[12095,7397,9495,12996,12295,9296,6397,4246,8696,7195,63267,4097]
+  },
+  p2m2: {
+    categories:['Electronics','Fashion','Home Appliances'],
+    months:['Jan 2024','Feb 2024','Mar 2024','Apr 2024','May 2024','Jun 2024','Jul 2024','Aug 2024','Sep 2024','Oct 2024','Nov 2024','Dec 2024'],
+    series:{
+      'Electronics':[12095,6798,8997,12996,11696,8498,6397,3499,7498,5998,57281,3698],
+      'Fashion':[0,0,498,0,0,798,0,747,0,1197,2991,399],
+      'Home Appliances':[0,599,0,0,599,0,0,0,1198,0,2995,0]
+    }
+  },
+  p2m3: { labels:['next_day','same_day','standard'], values:[2988.21,3359.55,2435.09] },
+
+  p3m1: {
+    labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    values:[12095,19492,28987,41983,54278,63574,69971,74217,82913,90108,153375,157472]
+  },
+  p3m2: {
+    labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    values:[null,-38.84,28.36,36.87,-5.39,-24.39,-31.19,-33.63,104.80,-17.26,779.32,-93.52]
+  },
+  p3m3: {
+    headers:['Customer','Rank','Revenue (AED)'],
+    rows:[['Ahmed Al Mansoori',1,37689],['Priya Sharma',2,27194],['Khalid Al Mutairi',3,23995],['Sofia Mendes',4,15295],['Mohammed Al Rashid',5,13891],['Ravi Patel',6,12796],['James Okonkwo',7,11092],['Layla Hassan',8,6490],['Fatima Al Zaabi',9,4790],['Chen Wei',10,4240]]
+  },
+
+  p4m1: {
+    headers:['Seller','Type','Revenue','Returns','Return %'],
+    rows:[['Samsung Gulf','FBN',59786,0,'0.00%'],['Apple MENA','FBN',48479,0,'0.00%'],['Sharaf DG','seller_fulfilled',23992,0,'0.00%'],['Extra Stores','seller_fulfilled',13194,0,'0.00%'],['Noon Fashion','FBN',4389,0,'0.00%'],['Cairo Electronics','seller_fulfilled',5391,0,'0.00%'],['Landmark Group','FBN',2241,4,'57.14%']]
+  },
+  p4m2: { labels:['FBN','seller_fulfilled'], values:[114895,42577] },
+  p4m3: { labels:['Samsung Gulf (Electronics)','Noon Fashion (Fashion)','Cairo Electronics (Home App.)'], values:[59786,4389,5391] },
+
+  p5m1: {
+    headers:['Cohort Month','Month Gap','Cohort Size'],
+    rows:[['Jan 2024',0,3],['Jan 2024',1,1],['Jan 2024',3,2],['Jan 2024',4,2],['Jan 2024',5,1],['Jan 2024',6,1],['Jan 2024',8,2],['Jan 2024',9,1],['Jan 2024',10,3],['Jan 2024',11,3],['Feb 2024',0,2],['Feb 2024',3,1],['Feb 2024',4,1],['Feb 2024',5,1],['Feb 2024',7,1],['Feb 2024',8,1],['Feb 2024',9,2],['Feb 2024',10,1],['Mar 2024',0,3],['Mar 2024',2,1],['Mar 2024',4,1],['Mar 2024',5,2],['Mar 2024',7,1],['Mar 2024',8,3],['Apr 2024',0,2],['Apr 2024',2,2],['Apr 2024',6,2],['Apr 2024',7,2]]
+  },
+  p5m2: { labels:['4 purchases','5 purchases','6 purchases','7 purchases'], values:[4,2,2,2] },
+  p5m3: {
+    headers:['Metric','Value'],
+    rows:[['Avg Days Between Purchases','66.98 days'],['Interpretation','Customers who have not ordered in ~134 days (2×) are high churn risk']]
+  },
+
+  p6m1: { labels:['Samsung Galaxy S24','iPhone 15 Pro','Samsung 55" QLED TV','Lenovo IdeaPad','Nike Running Shoes','Adidas Hoodie','PS5 Console','Air Fryer Philips','AirPods Pro','Canon EOS Camera'], values:[0,0,0,0,0,57.14,0,0,0,0] },
+  p6m2: { labels:['Electronics','Fashion','Home Appliances'], values:[0,33.33,0] },
+  p6m3: {
+    headers:['Product','Top Return Reason','Revenue Lost (AED)'],
+    rows:[['Adidas Hoodie','wrong size',1245],['Nike Running Shoes','changed mind',798]]
+  },
+  p6m4: { labels:['wrong size','defective product','changed mind'], values:[40,40,20] },
+
+  p7m1: { labels:['same_day','next_day','standard'], values:[84803,56776,28529] },
+  p7m2: { labels:['same_day','next_day','standard'], values:[14.81,0,0] },
+  p7m3: {
+    headers:['Delivery Type','Country','Avg Order Value (AED)'],
+    rows:[['next_day','Egypt',1048],['same_day','Egypt',1203.33],['standard','Egypt',548],['next_day','KSA',2058.80],['same_day','KSA',2298.17],['standard','KSA',2212.86],['next_day','UAE',4229],['same_day','UAE',5015.33],['standard','UAE',2848.75]]
+  },
+  p7m4: {
+    categories:['next_day','same_day','standard'],
+    months:['Jan 2024','Feb 2024','Mar 2024','Apr 2024','May 2024','Jun 2024','Jul 2024','Aug 2024','Sep 2024','Oct 2024','Nov 2024','Dec 2024'],
+    series:{
+      'next_day':[null,100,-50,0,100,-50,0,0,0,0,500,-83.33],
+      'same_day':[null,100,0,-50,0,100,null,-50,0,100,550,-92.31],
+      'standard':[null,0,0,100,-50,0,100,null,-50,100,null,0]
+    }
+  },
+
+  p8m1: { labels:['pre_campaign','campaign','post_campaign'], values:[90108,63267,4097] },
+  p8m2: { labels:['Electronics','Fashion','Home Appliances'], values:[579.20,218.24,275.00] },
+  p8m3: { labels:['repeat','new'], values:[100,0] },
+  p8m4: {
+    months:['Oct 2024','Nov 2024','Dec 2024'],
+    revenue:[7195,63267,4097],
+    growth:[-17.26,779.32,-93.52]
+  },
+
+  p9m1: {
+    headers:['Total GMV','Delivered Revenue','Cancellation Rate','Return Rate','Active Customers','Active Sellers'],
+    rows:[['AED 170,108','AED 157,472','6.67%','6.67%','10','7']]
+  },
+  p9m2: {
+    labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    revenue:[12095,7397,9495,12996,12295,9296,6397,4246,8696,7195,63267,4097],
+    rolling:[12095,9746,9662.33,9962.67,11595.33,11529,9329.33,6646.33,6446.33,6712.33,26386,24853]
+  },
+  p9m3: {
+    headers:['Country','Category','GMV (AED)'],
+    rows:[['Egypt','Home Appliances',5391],['Egypt','Fashion',7776],['Egypt','Electronics',3499],['KSA','Home Appliances',0],['KSA','Fashion',1794],['KSA','Electronics',37779],['UAE','Home Appliances',0],['UAE','Fashion',498],['UAE','Electronics',113371]]
+  },
+  p9m4: {
+    headers:['Seller ID','Type','Revenue','Return Rate','Rating','Orders','Rank in Type'],
+    rows:[[1,'FBN',59786,'0.00%',4.80,13,1],[2,'FBN',48479,'0.00%',4.90,16,2],[5,'FBN',4389,'0.00%',4.60,7,3],[7,'FBN',2241,'57.14%',4.50,7,4],[3,'seller_fulfilled',23992,'0.00%',4.20,8,1],[4,'seller_fulfilled',13194,'0.00%',4.10,5,2],[6,'seller_fulfilled',5391,'0.00%',3.90,5,3]]
+  },
+  p9m5: { labels:['High','Mid','Low'], values:[88878,53074,15520] }
+};
+</script>
+
+<!-- PROJECT 1 -->
+<section class="proj" id="p1">
+  <div class="proj-hdr">
+    <div>
+      <p class="proj-num">Project 01</p>
+      <h2 class="proj-title">E-Commerce Schema Design & Data Modelling</h2>
+      <p class="proj-q">"How should a marketplace database be structured to support analytics at scale?"</p>
+      <div class="tags"><span class="tag">Schema Design</span><span class="tag">Foreign Keys</span><span class="tag">CHECK Constraints</span><span class="tag">CTE</span><span class="tag">LEFT JOIN</span></div>
+    </div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">Six tables, each with one job. Separating customers, sellers, products, orders, order_items and returns means a price change never corrupts historical data. All 9 downstream projects run off this schema without modification — designed once, queried nine ways.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb"><div class="mh"><p class="mt">Metric 1 — Realized Net Revenue by Geography</p><p class="md">Delivered orders only. Cancelled and returned excluded. <strong>Bar chart:</strong> comparing discrete geographies where magnitude difference matters.</p></div><div class="ca"><canvas id="cv-1-1"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: REALIZED NET REVENUE BY GEOGRAPHY</span>
+<span class="kw">select</span> o.country, <span class="fn">sum</span>(oi.quantity * oi.unit_price) <span class="kw">as</span> net_revenue
+<span class="kw">from</span> orders o <span class="kw">join</span> order_items oi <span class="kw">on</span> o.order_id = oi.order_id
+<span class="kw">where</span> o.status = <span class="st">'delivered'</span>
+<span class="kw">group by</span> o.country <span class="kw">order by</span> net_revenue <span class="kw">desc</span>;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 2 — Top 5 Merchandise Demand Drivers</p><p class="md">Includes pending orders as pipeline revenue. Excludes cancelled and returned. <strong>Horizontal bar:</strong> long product names fit on the y-axis; ranking reads top-to-bottom.</p></div><div class="ca"><canvas id="cv-1-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: TOP 5 MERCHANDISE DEMAND DRIVERS</span>
+<span class="kw">select</span> p.product_name, <span class="fn">sum</span>(oi.quantity*oi.unit_price) product_revenue
+<span class="kw">from</span> order_items oi <span class="kw">join</span> products p <span class="kw">on</span> p.product_id = oi.product_id
+<span class="kw">join</span> orders o <span class="kw">on</span> o.order_id = oi.order_id
+<span class="kw">where</span> o.status &lt;&gt; <span class="st">'cancelled'</span> <span class="kw">and</span> o.status &lt;&gt; <span class="st">'returned'</span>
+<span class="kw">group by</span> p.product_name <span class="kw">order by</span> product_revenue <span class="kw">desc limit</span> 5;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 3 — Fulfillment Funnel Distribution</p><p class="md">86.67% delivered, 6.67% cancelled, 6.67% returned. <strong>Doughnut:</strong> proportion of a whole split into status parts.</p></div><div class="ca"><canvas id="cv-1-3"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: FULFILLMENT FUNNEL DISTRIBUTION</span>
+<span class="kw">select</span> o.status, <span class="fn">count</span>(o.order_id) orders_count,
+  <span class="fn">round</span>(100*<span class="fn">count</span>(o.order_id)/(<span class="kw">select</span> <span class="fn">count</span>(order_id) <span class="kw">from</span> orders)::<span class="kw">decimal</span>,2) percentage_of_total
+<span class="kw">from</span> orders o <span class="kw">group by</span> o.status <span class="kw">order by</span> percentage_of_total <span class="kw">desc</span>;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 4 — Pipeline GMV Share by Category</p><p class="md">Electronics dominates at AED 145,451. LEFT JOIN ensures zero-revenue categories surface. <strong>Doughnut:</strong> GMV is a share-of-whole story.</p></div><div class="ca"><canvas id="cv-1-4"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 4: PIPELINE GMV SHARE BY CATEGORY</span>
+<span class="kw">with</span> x <span class="kw">as</span> (
+  <span class="kw">select</span> oi.product_id, <span class="fn">sum</span>(oi.quantity*oi.unit_price) a
+  <span class="kw">from</span> order_items oi <span class="kw">join</span> orders o <span class="kw">on</span> o.order_id = oi.order_id
+  <span class="kw">where</span> o.status &lt;&gt; <span class="st">'cancelled'</span> <span class="kw">and</span> o.status &lt;&gt; <span class="st">'returned'</span>
+  <span class="kw">group by</span> oi.product_id
+)
+<span class="kw">select</span> p.category_l1, <span class="fn">coalesce</span>(<span class="fn">sum</span>(x.a),0) revenue_by_category
+<span class="kw">from</span> products p <span class="kw">left join</span> x <span class="kw">on</span> p.product_id = x.product_id
+<span class="kw">group by</span> p.category_l1 <span class="kw">order by</span> revenue_by_category <span class="kw">desc</span>;</pre></div></div>
+  </div>
+</section>
+
+<!-- PROJECT 2 -->
+<section class="proj" id="p2">
+  <div class="proj-hdr">
+    <div><p class="proj-num">Project 02</p><h2 class="proj-title">Sales Performance Dashboard</h2><p class="proj-q">"How is revenue trending across markets and categories month by month?"</p><div class="tags"><span class="tag">date_trunc</span><span class="tag">GROUP BY</span><span class="tag">CTEs</span><span class="tag">AOV</span><span class="tag">LEFT JOIN</span></div></div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">The Monday morning questions. How did we do last month, which categories are growing, and are customers spending more or less per order. November's White Friday spike at AED 63,267 dominates the trend — the rest of the year averages around AED 9,000/month.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 1 — Monthly Revenue Trend</p><p class="md">Clear White Friday spike in November (AED 63,267 vs ~AED 9K monthly average). <strong>Line chart:</strong> time series where direction of change is the story.</p></div><div class="ca"><canvas id="cv-2-1"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: MONTHLY REVENUE TREND</span>
+<span class="kw">select</span> <span class="fn">date_trunc</span>(<span class="st">'month'</span>, o.order_date) <span class="st">"month"</span>, <span class="fn">sum</span>(oi.quantity*oi.unit_price) revenue_by_month
+<span class="kw">from</span> orders o <span class="kw">join</span> order_items oi <span class="kw">on</span> o.order_id = oi.order_id
+<span class="kw">where</span> o.status=<span class="st">'delivered'</span>
+<span class="kw">group by</span> <span class="fn">date_trunc</span>(<span class="st">'month'</span>, o.order_date) <span class="kw">order by</span> <span class="st">"month"</span> asc;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 2 — Category Performance Over Time</p><p class="md">Electronics dominates throughout. Fashion and Home Appliances show small but consistent presence. LEFT JOIN intentional — surfaces zero-revenue months rather than omitting them. <strong>Multi-line chart:</strong> three categories tracked on the same time axis.</p></div><div class="ca"><canvas id="cv-2-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: CATEGORY PERFORMANCE OVER TIME</span>
+<span class="cm">-- left join intentional: surfaces categories with no sales in a given month</span>
+<span class="kw">with</span> x <span class="kw">as</span> (
+  <span class="kw">select</span> oi.product_id, <span class="fn">date_trunc</span>(<span class="st">'month'</span>, o.order_date) <span class="kw">as</span> sales_month, <span class="fn">sum</span>(oi.quantity*oi.unit_price) <span class="kw">as</span> revenue
+  <span class="kw">from</span> orders o <span class="kw">join</span> order_items oi <span class="kw">on</span> o.order_id = oi.order_id
+  <span class="kw">where</span> o.status = <span class="st">'delivered'</span> <span class="kw">group by</span> oi.product_id, <span class="fn">date_trunc</span>(<span class="st">'month'</span>, o.order_date)
+)
+<span class="kw">select</span> p.category_l1, x.sales_month <span class="kw">as</span> <span class="st">"month"</span>, <span class="fn">coalesce</span>(<span class="fn">sum</span>(x.revenue), 0) <span class="kw">as</span> categoryrevenue_by_month
+<span class="kw">from</span> products p <span class="kw">left join</span> x <span class="kw">on</span> p.product_id = x.product_id
+<span class="kw">group by</span> p.category_l1, x.sales_month <span class="kw">order by</span> p.category_l1, <span class="st">"month"</span> asc;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 3 — AOV by Delivery Type</p><p class="md">Same-day customers spend most (AED 3,359) vs standard (AED 2,435). count(distinct order_id) used — not row count — to avoid inflating AOV on multi-item orders. <strong>Bar chart:</strong> three delivery types on one value.</p></div><div class="ca"><canvas id="cv-2-3"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: AOV BY DELIVERY TYPE</span>
+<span class="kw">with</span> x <span class="kw">as</span> (<span class="kw">select</span> order_id, delivery_type <span class="kw">from</span> orders <span class="kw">where</span> status = <span class="st">'delivered'</span>)
+<span class="kw">select</span> x.delivery_type,
+  <span class="fn">round</span>((<span class="fn">sum</span>(oi.quantity*oi.unit_price)/<span class="fn">count</span>(<span class="kw">distinct</span> x.order_id)),2) <span class="kw">as</span> aov
+<span class="kw">from</span> order_items oi <span class="kw">join</span> x <span class="kw">on</span> x.order_id = oi.order_id <span class="kw">group by</span> x.delivery_type;</pre></div></div>
+  </div>
+</section>
+
+<!-- PROJECT 3 -->
+<section class="proj" id="p3">
+  <div class="proj-hdr">
+    <div><p class="proj-num">Project 03</p><h2 class="proj-title">Advanced Revenue Analytics with Window Functions</h2><p class="proj-q">"What does cumulative GMV and month-over-month growth look like over time?"</p><div class="tags"><span class="tag">sum() over</span><span class="tag">lag()</span><span class="tag">dense_rank()</span><span class="tag">Window Functions</span></div></div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">Window functions compute across rows without collapsing them — unlike GROUP BY. Running total reaches AED 157,472 by December. November's 779% MoM spike followed by -93.5% in December is the demand pull-forward signal explored further in Project 8.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb"><div class="mh"><p class="mt">Metric 1 — Running Total of Revenue</p><p class="md">Cumulative GMV from Jan–Dec 2024. The steep climb in November reflects White Friday. <strong>Line chart:</strong> cumulative totals must always be a rising line — bars would imply each month is independent.</p></div><div class="ca"><canvas id="cv-3-1"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: RUNNING TOTAL OF REVENUE</span>
+<span class="kw">with</span> x <span class="kw">as</span> (
+  <span class="kw">select</span> <span class="fn">date_trunc</span>(<span class="st">'month'</span>, o.order_date) <span class="st">"month"</span>, <span class="fn">sum</span>(oi.quantity*oi.unit_price) revenue_by_month
+  <span class="kw">from</span> orders o <span class="kw">join</span> order_items oi <span class="kw">on</span> o.order_id = oi.order_id
+  <span class="kw">where</span> o.status = <span class="st">'delivered'</span> <span class="kw">group by</span> <span class="fn">date_trunc</span>(<span class="st">'month'</span>, o.order_date)
+)
+<span class="kw">select</span> <span class="st">"month"</span>, <span class="fn">sum</span>(revenue_by_month) <span class="kw">over</span> (<span class="kw">order by</span> <span class="st">"month"</span> asc) running_total_revenue
+<span class="kw">from</span> x <span class="kw">order by</span> <span class="st">"month"</span> asc;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 2 — Month-over-Month Revenue Growth %</p><p class="md">November: +779.32%. December: -93.52%. lag() pulls previous month's value into current row for comparison. Jan shows NULL — correct, no prior month. <strong>Bar chart:</strong> negative values drop below zero, instantly visible.</p></div><div class="ca"><canvas id="cv-3-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: MONTH-OVER-MONTH REVENUE GROWTH %</span>
+<span class="kw">with</span> x <span class="kw">as</span> (...)
+<span class="kw">select</span> <span class="st">"month"</span>,
+  <span class="fn">round</span>(100.0*(revenue_by_month-<span class="fn">lag</span>(revenue_by_month,1) <span class="kw">over</span> (<span class="kw">order by</span> <span class="st">"month"</span>))
+    /<span class="fn">lag</span>(revenue_by_month,1) <span class="kw">over</span> (<span class="kw">order by</span> <span class="st">"month"</span>),2) mom_growth_percentage
+<span class="kw">from</span> x <span class="kw">order by</span> <span class="st">"month"</span> asc;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 3 — Customer Rank by Revenue</p><p class="md">Ahmed Al Mansoori leads at AED 37,689. dense_rank() used — ties get same rank, next rank doesn't skip. <strong>Table:</strong> names + rank + revenue in one scannable view.</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-3-3"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: CUSTOMER RANK BY REVENUE</span>
+<span class="kw">with</span> x <span class="kw">as</span> (...), cte <span class="kw">as</span> (...)
+<span class="kw">select</span> full_name, <span class="fn">dense_rank</span>() <span class="kw">over</span> (<span class="kw">order by</span> revenue <span class="kw">desc</span>) customer_rank_by_revenue, revenue
+<span class="kw">from</span> cte <span class="kw">order by</span> customer_rank_by_revenue;</pre></div></div>
+  </div>
+</section>
+
+<!-- PROJECT 4 -->
+<section class="proj" id="p4">
+  <div class="proj-hdr">
+    <div><p class="proj-num">Project 04</p><h2 class="proj-title">Seller & Fulfillment Intelligence</h2><p class="proj-q">"Which sellers are driving GMV, and does FBN actually outperform seller-fulfilled?"</p><div class="tags"><span class="tag">partition by</span><span class="tag">COALESCE</span><span class="tag">Multi-CTE</span><span class="tag">Return Rate</span></div></div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">FBN generates AED 114,895 vs AED 42,577 for seller-fulfilled — but FBN has a 10.53% return rate driven entirely by Landmark Group (57.14% return rate). Samsung Gulf and Apple MENA are clean at 0% returns.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 1 — Seller Revenue and Return Rate</p><p class="md">Landmark Group is the outlier — AED 2,241 revenue with a 57.14% return rate. Two CTEs: one for delivered revenue, one for returns. LEFT JOIN ensures zero-return sellers appear with 0%, not disappear. <strong>Table:</strong> multi-column scorecard.</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-4-1"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: SELLER REVENUE AND RETURN RATE</span>
+<span class="kw">with</span> x <span class="kw">as</span> ( <span class="cm">-- delivered revenue per seller</span> )
+, y <span class="kw">as</span> ( <span class="cm">-- return count per seller</span> )
+<span class="kw">select</span> x.seller_name, x.fulfillment_type, x.total_revenue,
+  <span class="fn">coalesce</span>(y.ct,0) return_count,
+  <span class="fn">round</span>(100.0*<span class="fn">coalesce</span>(y.ct,0)/(x.cnt+<span class="fn">coalesce</span>(y.ct,0)),2) return_pctg
+<span class="kw">from</span> x <span class="kw">left join</span> y <span class="kw">on</span> x.seller_id = y.seller_id;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 2 — FBN vs Seller-Fulfilled</p><p class="md">FBN: AED 114,895 / 34 orders / avg rating 4.79 / 10.53% return rate. Seller-fulfilled: AED 42,577 / 18 orders / 4.09 rating / 0% returns. max(y.ct) used to avoid GROUP BY — safe since exactly one return count exists per fulfillment type. <strong>Bar:</strong> head-to-head comparison.</p></div><div class="ca"><canvas id="cv-4-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: FBN VS. SELLER-FULFILLED</span>
+<span class="cm">-- max(y.ct): one return count per fulfillment type, avoids GROUP BY bloat</span>
+<span class="kw">with</span> y <span class="kw">as</span> (...)
+<span class="kw">select</span> s.fulfillment_type, <span class="fn">sum</span>(...) total_revenue,
+  <span class="fn">round</span>(<span class="fn">avg</span>(s.rating),2) avg_rating,
+  <span class="fn">round</span>(100.0*<span class="fn">coalesce</span>(<span class="fn">max</span>(y.ct),0)/(...),2) return_pctg
+<span class="kw">from</span> sellers s ... <span class="kw">left join</span> y <span class="kw">on</span> s.fulfillment_type = y.fulfillment_type
+<span class="kw">where</span> o.status = <span class="st">'delivered'</span> <span class="kw">group by</span> s.fulfillment_type;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 3 — Top Seller per Category</p><p class="md">Samsung Gulf leads Electronics (AED 59,786), Noon Fashion leads Fashion (AED 4,389), Cairo Electronics leads Home Appliances (AED 5,391). dense_rank() partitioned by category resets ranking per category independently. <strong>Bar:</strong> one winner per category.</p></div><div class="ca"><canvas id="cv-4-3"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: TOP SELLER PER CATEGORY</span>
+<span class="kw">with</span> x <span class="kw">as</span> (
+  <span class="kw">select</span> s.seller_name, p.category_l1, <span class="fn">sum</span>(...) revenue,
+    <span class="fn">dense_rank</span>() <span class="kw">over</span> (<span class="kw">partition by</span> p.category_l1 <span class="kw">order by</span> <span class="fn">sum</span>(...) <span class="kw">desc</span>) <span class="kw">as</span> rank
+  <span class="kw">from</span> order_items oi ... <span class="kw">where</span> o.status = <span class="st">'delivered'</span>
+  <span class="kw">group by</span> p.category_l1, s.seller_id, s.seller_name
+)
+<span class="kw">select</span> seller_id, seller_name, category_l1, revenue
+<span class="kw">from</span> x <span class="kw">where</span> rank = 1 <span class="kw">order by</span> category_l1;</pre></div></div>
+  </div>
+</section>
+
+<!-- PROJECT 5 -->
+<section class="proj" id="p5">
+  <div class="proj-hdr">
+    <div><p class="proj-num">Project 05</p><h2 class="proj-title">Customer Cohort & Retention Analytics</h2><p class="proj-q">"Are customers coming back, and how long does it take them to return?"</p><div class="tags"><span class="tag">Cohort Analysis</span><span class="tag">lead()</span><span class="tag">Date Arithmetic</span></div></div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">Every customer has purchased 4–7 times — unusually strong retention for a sample dataset. Average gap between purchases is 66.98 days, meaning customers who haven't ordered in ~134 days are at churn risk. All White Friday buyers (November) were returning customers — zero new customer acquisition during the campaign.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 1 — User Retention Cohort Matrix</p><p class="md">month_gap=0 shows acquisition size. month_gap>0 shows returning customers from that cohort. The negative month_gap (-1) in the March cohort is a data anomaly worth noting — an order placed before the recorded first_delivered_order_month, likely from the orders table including non-delivered orders in the CTE. <strong>Table:</strong> two-dimensional matrix.</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-5-1"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: USER RETENTION COHORT MATRIX</span>
+<span class="cm">-- month_gap=0: cohort size at acquisition | month_gap>0: returning customers</span>
+<span class="kw">with</span> fpd <span class="kw">as</span> (...), cte <span class="kw">as</span> (...)
+<span class="kw">select</span> first_delivered_order_month,
+  (((extract(year from order_month)-extract(year from first_delivered_order_month))*12
+  +extract(month from order_month)-extract(month from first_delivered_order_month))) month_gap,
+  count(distinct customer_id) cohort_size
+from cte group by first_delivered_order_month, month_gap;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 2 — Repeat Purchase Frequency</p><p class="md">All customers purchased 4–7 times — no one-time buyers in this dataset. Real-world distribution would show a steep drop after 1. <strong>Bar chart:</strong> discrete frequency counts as a histogram pattern.</p></div><div class="ca"><canvas id="cv-5-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: REPEAT PURCHASE FREQUENCY</span>
+<span class="kw">with</span> x <span class="kw">as</span> (
+  <span class="kw">select</span> customer_id, <span class="fn">count</span>(<span class="kw">distinct</span> order_id) purchase_frequency
+  <span class="kw">from</span> orders <span class="kw">where</span> status = <span class="st">'delivered'</span> <span class="kw">group by</span> customer_id
+)
+<span class="kw">select</span> purchase_frequency, <span class="fn">count</span>(customer_id) num_customers,
+  <span class="fn">round</span>(100.0*<span class="fn">count</span>(customer_id)/(<span class="kw">select</span> <span class="fn">count</span>(customer_id) <span class="kw">from</span> x),2) percentage_customers
+<span class="kw">from</span> x <span class="kw">group by</span> purchase_frequency;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 3 — Avg Days Between Purchases</p><p class="md">66.98 days average repurchase cycle. Customers inactive for 134+ days (2×) should trigger re-engagement campaigns. lead() used — pulls next order_date into current row for each customer. <strong>KPI table:</strong> single number with business interpretation.</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-5-3"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: AVG DAYS BETWEEN PURCHASES</span>
+<span class="kw">with</span> x <span class="kw">as</span> (
+  <span class="kw">select</span> customer_id, order_id,
+    (<span class="fn">lead</span>(order_date,1) <span class="kw">over</span> (<span class="kw">partition by</span> customer_id <span class="kw">order by</span> order_date)-order_date) days_bw_orders
+  <span class="kw">from</span> orders <span class="kw">where</span> status = <span class="st">'delivered'</span>
+)
+<span class="kw">select</span> <span class="fn">round</span>(<span class="fn">avg</span>(days_bw_orders),2) avg_days_bw_orders <span class="kw">from</span> x;</pre></div></div>
+  </div>
+</section>
+
+<!-- PROJECT 6 -->
+<section class="proj" id="p6">
+  <div class="proj-hdr">
+    <div><p class="proj-num">Project 06</p><h2 class="proj-title">Returns & Refund Analysis</h2><p class="proj-q">"Which products and categories have unacceptable return rates?"</p><div class="tags"><span class="tag">CASE WHEN Flag</span><span class="tag">RIGHT JOIN</span><span class="tag">Financial Impact</span><span class="tag">dense_rank()</span></div></div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">The Adidas Hoodie has a 57.14% return rate — the only product with returns in this dataset. Fashion as a category is flagged High Risk at 33.33%. All returns are Landmark Group's products, which explains their 57.14% return rate in Project 4.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb"><div class="mh"><p class="mt">Metric 1 — Return Rate by Product</p><p class="md">Adidas Hoodie: 57.14% return rate. All other products: 0%. RIGHT JOIN ensures all delivered products appear. ::decimal cast forces decimal division — integer division would truncate. <strong>Horizontal bar:</strong> product names on y-axis, outlier immediately visible.</p></div><div class="ca"><canvas id="cv-6-1"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: RETURN RATE BY PRODUCT</span>
+<span class="kw">with</span> rt_prod <span class="kw">as</span> (...), dlv_prod <span class="kw">as</span> (...)
+<span class="kw">select</span> d.product_id, d.product_name,
+  <span class="fn">round</span>(100*(<span class="fn">coalesce</span>(r.ct,0)/(d.ct+<span class="fn">coalesce</span>(r.ct,0))),2) rt_to_dlv_pctg
+<span class="kw">from</span> rt_prod r <span class="kw">right join</span> dlv_prod d <span class="kw">on</span> r.product_id = d.product_id;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 2 — Category Return Rate with Risk Flag</p><p class="md">Fashion: 33.33% — High Risk. Electronics and Home Appliances: 0% — Normal. CASE WHEN flags above 10% threshold. The 10% is a business decision, not a technical one. <strong>Bar chart:</strong> category comparison with risk context.</p></div><div class="ca"><canvas id="cv-6-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: CATEGORY RETURN RATE + RISK FLAG</span>
+<span class="kw">select</span> dlv.category_l1,
+  <span class="fn">coalesce</span>(<span class="fn">round</span>(100.0*<span class="fn">coalesce</span>(rt.ct,0)/(<span class="fn">coalesce</span>(rt.ct,0)+dlv.ct),2),0) rt_pctg,
+  <span class="kw">case when</span> ... &gt; 10 <span class="kw">then</span> <span class="st">'High Risk'</span> <span class="kw">else</span> <span class="st">'Normal'</span> <span class="kw">end</span> risk_status
+<span class="kw">from</span> dlv_prod dlv <span class="kw">left join</span> rt_prod rt <span class="kw">on</span> dlv.category_l1 = rt.category_l1;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 3 — Return Reason + Financial Impact</p><p class="md">Adidas Hoodie: AED 1,245 lost to wrong size. Nike Shoes: AED 798 lost to changed mind. dense_rank() within each product finds top reason. Financial impact translates % into AED — the number operations teams act on. <strong>Table:</strong> product + reason + AED lost.</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-6-3"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: RETURN REASONS + FINANCIAL IMPACT</span>
+<span class="kw">with</span> rt_reason <span class="kw">as</span> (
+  <span class="kw">select</span> p.product_name, r.reason, <span class="fn">sum</span>(oi.unit_price*oi.quantity) revenue_lost,
+    <span class="fn">dense_rank</span>() <span class="kw">over</span> (<span class="kw">partition by</span> p.product_name <span class="kw">order by</span> <span class="fn">sum</span>(oi.unit_price*oi.quantity) <span class="kw">desc</span>) reason_rank
+  <span class="kw">from</span> products p <span class="kw">join</span> returns r ... <span class="kw">join</span> order_items oi ...
+  <span class="kw">group by</span> p.product_name, r.reason
+)
+<span class="kw">select</span> product_name, reason, revenue_lost <span class="kw">from</span> rt_reason <span class="kw">where</span> reason_rank = 1;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 4 — Platform Return Reason Distribution</p><p class="md">Wrong size: 40%, Defective product: 40%, Changed mind: 20%. Two distinct problems — sizing (content/UX fix) and defects (supplier quality fix). <strong>Doughnut:</strong> share-of-whole reason breakdown.</p></div><div class="ca"><canvas id="cv-6-4"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 4: RETURN REASON DISTRIBUTION</span>
+<span class="kw">select</span> reason, <span class="fn">count</span>(reason) occurences,
+  <span class="fn">round</span>(100.0*<span class="fn">count</span>(reason)/(<span class="kw">select</span> <span class="fn">count</span>(<span class="kw">distinct</span> return_id) <span class="kw">from</span> returns),2) pctg
+<span class="kw">from</span> returns <span class="kw">group by</span> reason;</pre></div></div>
+  </div>
+</section>
+
+<!-- PROJECT 7 -->
+<section class="proj" id="p7">
+  <div class="proj-hdr">
+    <div><p class="proj-num">Project 07</p><h2 class="proj-title">Delivery & Operations Performance</h2><p class="proj-q">"Which delivery types drive the most value, and where are orders lost to cancellations?"</p><div class="tags"><span class="tag">Conditional Aggregation</span><span class="tag">Multi-Dim GROUP BY</span><span class="tag">MoM by Segment</span></div></div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">Same-day accounts for 45% of orders and AED 84,803 in revenue — the dominant delivery type. UAE same-day customers have the highest AOV at AED 5,015. Same-day also has the highest cancellation rate at 14.81% — customers who choose same-day are more likely to cancel.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb"><div class="mh"><p class="mt">Metric 1 — Order Volume & Revenue by Delivery Type</p><p class="md">Same-day: 27 orders, AED 84,803. Next-day: 19 orders, AED 56,776. Standard: 14 orders, AED 28,529. <strong>Bar chart:</strong> three types compared on revenue magnitude.</p></div><div class="ca"><canvas id="cv-7-1"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: VOLUME & REVENUE BY DELIVERY TYPE</span>
+<span class="kw">select</span> o.delivery_type,
+  <span class="fn">count</span>(<span class="kw">distinct</span> o.order_id) order_volume,
+  <span class="fn">round</span>(100.0*<span class="fn">count</span>(<span class="kw">distinct</span> o.order_id)/(<span class="kw">select</span> <span class="fn">count</span>(<span class="kw">distinct</span> order_id) <span class="kw">from</span> orders),2) pctg_of_total_orders,
+  <span class="fn">sum</span>(oi.quantity*oi.unit_price) revenue
+<span class="kw">from</span> orders o <span class="kw">join</span> order_items oi <span class="kw">on</span> o.order_id = oi.order_id
+<span class="kw">group by</span> o.delivery_type <span class="kw">order by</span> revenue <span class="kw">desc</span>;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 2 — Cancellation Rate by Delivery Type</p><p class="md">Same-day: 14.81% cancellation. Next-day and standard: 0%. sum(case when status='cancelled' then 1 else 0 end) — the standard conditional counting pattern. <strong>Bar chart:</strong> small differences between types visible as bar heights.</p></div><div class="ca"><canvas id="cv-7-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: CANCELLATION RATE BY DELIVERY TYPE</span>
+<span class="kw">select</span> delivery_type,
+  <span class="fn">round</span>(100.0*<span class="fn">sum</span>(<span class="kw">case when</span> status=<span class="st">'cancelled'</span> <span class="kw">then</span> 1 <span class="kw">else</span> 0 <span class="kw">end</span>)/<span class="fn">count</span>(<span class="kw">distinct</span> order_id),2) cancellation_rate
+<span class="kw">from</span> orders <span class="kw">group by</span> delivery_type;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 3 — AOV by Delivery Type and Country</p><p class="md">UAE same-day: AED 5,015 (highest). Egypt standard: AED 548 (lowest). CTE computes order-level totals first — averaging directly from order_items gives wrong results for multi-item orders. <strong>Table:</strong> 9-cell matrix (3 types × 3 countries).</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-7-3"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: AOV BY DELIVERY TYPE AND COUNTRY</span>
+<span class="kw">with</span> cte <span class="kw">as</span> (
+  <span class="kw">select</span> o.order_id, o.delivery_type, o.country, <span class="fn">round</span>(<span class="fn">sum</span>(oi.quantity*oi.unit_price),2) order_amount
+  <span class="kw">from</span> order_items oi <span class="kw">join</span> orders o <span class="kw">on</span> o.order_id = oi.order_id
+  <span class="kw">group by</span> o.order_id, o.delivery_type, o.country
+)
+<span class="kw">select</span> delivery_type, country, <span class="fn">round</span>(<span class="fn">avg</span>(order_amount),2) avg_order_value
+<span class="kw">from</span> cte <span class="kw">group by</span> country, delivery_type <span class="kw">order by</span> country, delivery_type;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 4 — MoM Order Volume Trend by Delivery Type</p><p class="md">All three delivery types spike in November then drop sharply in December — the White Friday pull-forward signal confirmed across all delivery modes. lag() partitioned by delivery_type resets the sequence per type independently. <strong>Line breaks are intentional:</strong> same_day had no orders in July and standard had no orders in August and November — the SQL query returns no row for those months, so no MoM growth can be calculated. Filling those gaps with 0% would imply orders were flat, which is factually incorrect. A break is the honest representation of missing data. <strong>Multi-line:</strong> three trend lines on the same time axis.</p></div><div class="ca"><canvas id="cv-7-4"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 4: MoM ORDER VOLUME TREND BY DELIVERY TYPE</span>
+<span class="kw">with</span> counts <span class="kw">as</span> (
+  <span class="kw">select</span> delivery_type, <span class="fn">date_trunc</span>(<span class="st">'month'</span>, order_date) order_month,
+    <span class="fn">count</span>(<span class="kw">distinct</span> order_id) num_orders,
+    <span class="fn">lag</span>(<span class="fn">count</span>(<span class="kw">distinct</span> order_id),1) <span class="kw">over</span> (<span class="kw">partition by</span> delivery_type <span class="kw">order by</span> <span class="fn">date_trunc</span>(<span class="st">'month'</span>,order_date)) lags
+  <span class="kw">from</span> orders <span class="kw">group by</span> delivery_type, <span class="fn">date_trunc</span>(<span class="st">'month'</span>, order_date)
+)
+<span class="kw">select</span> delivery_type, order_month, <span class="fn">round</span>(100.0*(num_orders-lags)/lags,2) MoM_growth
+<span class="kw">from</span> counts <span class="kw">order by</span> delivery_type, order_month;</pre></div></div>
+  </div>
+</section>
+
+<!-- PROJECT 8 -->
+<section class="proj" id="p8">
+  <div class="proj-hdr">
+    <div><p class="proj-num">Project 08</p><h2 class="proj-title">Marketing & Campaign Effectiveness</h2><p class="proj-q">"Did White Friday drive incremental revenue or just pull demand forward from December?"</p><div class="tags"><span class="tag">Period Labelling</span><span class="tag">Campaign Uplift</span><span class="tag">Pull-Forward Signal</span><span class="tag">Two-Level CTE</span></div></div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">The verdict: strong pull-forward signal. Pre-campaign average was ~AED 9K/month. November hit AED 63,267. December dropped to AED 4,097 — below even October's AED 7,195. December fell below baseline, which means White Friday pulled forward demand that wasn't replaced.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb"><div class="mh"><p class="mt">Metric 1 — Pre / During / Post Campaign Revenue</p><p class="md">Pre-campaign AED 90,108 (31 orders over 10 months = ~AED 9K/month avg). Campaign: AED 63,267 in one month. Post: AED 4,097. The ORDER BY uses a nested CASE to force chronological display. <strong>Bar chart:</strong> three periods, one metric — the contrast is the story.</p></div><div class="ca"><canvas id="cv-8-1"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: PRE / DURING / POST CAMPAIGN REVENUE</span>
+<span class="kw">select</span>
+  <span class="kw">case when</span> o.order_date &lt; <span class="st">'2024-11-01'</span> <span class="kw">then</span> <span class="st">'pre_campaign'</span>
+       <span class="kw">when</span> o.order_date &gt; <span class="st">'2024-11-30'</span> <span class="kw">then</span> <span class="st">'post_campaign'</span>
+       <span class="kw">else</span> <span class="st">'campaign'</span> <span class="kw">end</span> sales_period,
+  <span class="fn">sum</span>(oi.quantity*oi.unit_price) revenue, <span class="fn">count</span>(<span class="kw">distinct</span> o.order_id) order_volume
+<span class="kw">from</span> orders o <span class="kw">join</span> order_items oi <span class="kw">on</span> o.order_id = oi.order_id
+<span class="kw">where</span> o.status = <span class="st">'delivered'</span> <span class="kw">group by</span> sales_period;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 2 — Campaign Uplift by Category</p><p class="md">Electronics: +579% uplift. Home Appliances: +275%. Fashion: +218%. All categories benefited — Electronics most. Baseline = avg monthly revenue excluding November. <strong>Bar chart:</strong> positive uplift bars per category.</p></div><div class="ca"><canvas id="cv-8-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: CAMPAIGN UPLIFT BY CATEGORY</span>
+<span class="kw">with</span> non_campaign_average <span class="kw">as</span> (...),
+     campaign_data <span class="kw">as</span> (...)
+<span class="kw">select</span> cd.category_l1,
+  <span class="fn">round</span>(100.0*(cd.revenue-nca.avg_revenue)/nca.avg_revenue,2) uplift_pctg
+<span class="kw">from</span> non_campaign_average nca
+<span class="kw">join</span> campaign_data cd <span class="kw">on</span> nca.category_l1 = cd.category_l1;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 3 — New vs Returning During Campaign</p><p class="md">100% of November buyers were returning customers — zero new customer acquisition during White Friday. This means the campaign spent budget rewarding existing customers, not acquiring new ones. <strong>Doughnut:</strong> new vs repeat as share of campaign buyers.</p></div><div class="ca"><canvas id="cv-8-3"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: NEW VS RETURNING DURING CAMPAIGN</span>
+<span class="kw">with</span> pre_camp_cust <span class="kw">as</span> (
+  <span class="kw">select distinct</span> customer_id <span class="kw">from</span> orders <span class="kw">where</span> order_date &lt; <span class="st">'2024-11-01'</span>
+), tagged_cust <span class="kw">as</span> (
+  <span class="kw">select distinct</span> o.customer_id,
+    <span class="kw">case when</span> pcc.customer_id <span class="kw">is null then</span> <span class="st">'new'</span> <span class="kw">else</span> <span class="st">'repeat'</span> <span class="kw">end</span> customer_type
+  <span class="kw">from</span> orders o <span class="kw">left join</span> pre_camp_cust pcc <span class="kw">on</span> o.customer_id = pcc.customer_id
+  <span class="kw">where</span> o.order_date <span class="kw">between</span> <span class="st">'2024-11-01'</span> <span class="kw">and</span> <span class="st">'2024-11-30'</span>
+)
+<span class="kw">select</span> customer_type, <span class="fn">count</span>(customer_id) num, ... <span class="kw">from</span> tagged_cust <span class="kw">group by</span> customer_type;</pre></div></div>
+
+    <div class="mb"><div class="mh"><p class="mt">Metric 4 — Demand Pull-Forward Signal</p><p class="md">Oct: AED 7,195. Nov: AED 63,267 (+779%). Dec: AED 4,097 (-93.5%). December fell below October baseline — confirmed pull-forward. September included in CTE to give October a lag value, then filtered in outer query after window functions run. <strong>Dual line:</strong> revenue and MoM growth on same axis.</p></div><div class="ca"><canvas id="cv-8-4"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 4: PULL-FORWARD SIGNAL (two-level CTE pattern)</span>
+<span class="cm">-- Sep in CTE feeds Oct's lag; filtered in outer query after window runs</span>
+<span class="kw">with</span> cte <span class="kw">as</span> (...), with_lag <span class="kw">as</span> (
+  <span class="kw">select</span> order_month, revenue_by_month,
+    <span class="fn">round</span>((100.0*(revenue_by_month-<span class="fn">lag</span>(revenue_by_month,1) <span class="kw">over</span> (<span class="kw">order by</span> order_month))
+      /<span class="fn">lag</span>(revenue_by_month,1) <span class="kw">over</span> (<span class="kw">order by</span> order_month)),2) revenue_growth,
+    ...volume_growth
+  <span class="kw">from</span> cte
+)
+<span class="kw">select</span> * <span class="kw">from</span> with_lag <span class="kw">where</span> order_month &lt;&gt; <span class="st">'2024-09-01'</span>;</pre></div></div>
+  </div>
+</section>
+
+<!-- PROJECT 9 -->
+<section class="proj" id="p9">
+  <div class="proj-hdr">
+    <div><p class="proj-num">Project 09</p><h2 class="proj-title">Executive GMV Dashboard</h2><p class="proj-q">"What is the full health of this business in a single query set?"</p><div class="tags"><span class="tag">rows between</span><span class="tag">CROSS JOIN</span><span class="tag">Rolling Average</span><span class="tag">LTV Segments</span><span class="tag">Capstone</span></div></div>
+    <div><p style="font-size:13px;color:var(--muted);line-height:1.9;">Total GMV: AED 170,108. Delivered revenue: AED 157,472 (92.6% realisation rate). 3 High-value customers generate AED 88,878 — more than the other 7 combined. UAE × Electronics dominates the country-category matrix at AED 113,371.</p></div>
+  </div>
+  <div class="mgrid">
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 1 — Business Health Summary</p><p class="md">Total GMV AED 170,108 · Delivered AED 157,472 · Cancellation 6.67% · Return rate 6.67% · 10 customers · 7 sellers. count(distinct case when status='cancelled' then order_id end) pattern — NULL ignored by COUNT, no subquery needed. <strong>Table:</strong> single-row KPI summary.</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-9-1"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 1: BUSINESS HEALTH SUMMARY</span>
+<span class="kw">select</span>
+  <span class="fn">sum</span>(oi.quantity*oi.unit_price) total_gmv,
+  <span class="fn">sum</span>(<span class="kw">case when</span> o.status=<span class="st">'delivered'</span> <span class="kw">then</span> oi.quantity*oi.unit_price <span class="kw">else</span> 0 <span class="kw">end</span>) delivered_revenue,
+  <span class="fn">round</span>(100.0*<span class="fn">count</span>(<span class="kw">distinct case when</span> o.status=<span class="st">'cancelled'</span> <span class="kw">then</span> o.order_id <span class="kw">end</span>)/<span class="fn">count</span>(<span class="kw">distinct</span> o.order_id),2) cancellation_rate,
+  <span class="fn">round</span>(100.0*<span class="fn">count</span>(<span class="kw">distinct case when</span> o.status=<span class="st">'returned'</span> <span class="kw">then</span> o.order_id <span class="kw">end</span>)/<span class="fn">count</span>(<span class="kw">distinct</span> o.order_id),2) return_rate,
+  <span class="fn">count</span>(<span class="kw">distinct</span> o.customer_id) active_customers, <span class="fn">count</span>(<span class="kw">distinct</span> p.seller_id) active_sellers
+<span class="kw">from</span> orders o <span class="kw">join</span> order_items oi ... <span class="kw">join</span> products p ...;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 2 — Rolling 3-Month Revenue Average</p><p class="md">The rolling average peaks at AED 26,386 in November vs actual AED 63,267 — showing the spike is a one-time event. rows between 2 preceding and current row defines a 3-month trailing window. <strong>Dual line:</strong> actual vs smoothed trend on same axis.</p></div><div class="ca"><canvas id="cv-9-2"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 2: ROLLING 3-MONTH REVENUE AVERAGE</span>
+<span class="kw">select</span> order_month, revenue,
+  <span class="fn">round</span>(<span class="fn">avg</span>(revenue) <span class="kw">over</span> (<span class="kw">order by</span> order_month <span class="kw">rows between</span> 2 <span class="kw">preceding and current row</span>),2) three_mth_rolling_avg
+<span class="kw">from</span> monthly_revenue;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 3 — Country × Category GMV Matrix</p><p class="md">UAE × Electronics: AED 113,371 (dominant). KSA × Home Appliances and UAE × Home Appliances both zero — no home appliance sellers in those markets. CROSS JOIN generates all 15 combinations, LEFT JOIN fills with 0 where no sales exist. <strong>Table:</strong> 15-cell matrix.</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-9-3"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 3: COUNTRY x CATEGORY GMV MATRIX</span>
+<span class="cm">-- cross join ensures every combination appears even with zero GMV</span>
+<span class="kw">with</span> countries <span class="kw">as</span> (<span class="kw">select distinct</span> country <span class="kw">from</span> orders),
+  categories <span class="kw">as</span> (<span class="kw">select distinct</span> category_l1 <span class="kw">from</span> products),
+  matrix <span class="kw">as</span> (<span class="kw">select</span> co.country, ca.category_l1 <span class="kw">from</span> countries co <span class="kw">cross join</span> categories ca),
+  answer <span class="kw">as</span> (...)
+<span class="kw">select</span> m.country, m.category_l1, <span class="fn">coalesce</span>(a.gmv,0.00) gmv
+<span class="kw">from</span> matrix m <span class="kw">left join</span> answer a <span class="kw">on</span> m.country=a.country <span class="kw">and</span> m.category_l1=a.category_l1;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 4 — Full Seller Scorecard</p><p class="md">Seller 7 (Landmark Group, FBN) ranks 4th in FBN with a 57.14% return rate — a quality flag despite being FBN. dense_rank() partitioned by fulfillment_type ranks within each group independently. <strong>Table:</strong> 7-column scorecard per seller.</p></div>
+      <div class="ca" style="min-height:auto"><div class="to" id="t-9-4"></div></div>
+      <button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 4: FULL SELLER SCORECARD</span>
+<span class="kw">select</span> s.seller_id, s.fulfillment_type,
+  <span class="fn">sum</span>(<span class="kw">case when</span> o.status=<span class="st">'delivered'</span> <span class="kw">then</span> oi.quantity*oi.unit_price <span class="kw">else</span> 0 <span class="kw">end</span>) total_revenue,
+  <span class="fn">round</span>(100.0*<span class="fn">count</span>(<span class="kw">distinct case when</span> o.status=<span class="st">'returned'</span> <span class="kw">then</span> o.order_id <span class="kw">else null end</span>)/<span class="fn">count</span>(<span class="kw">distinct</span> o.order_id),2) return_rate,
+  <span class="fn">round</span>(s.rating,2) average_rating, <span class="fn">count</span>(<span class="kw">distinct</span> o.order_id) order_count,
+  <span class="fn">dense_rank</span>() <span class="kw">over</span> (<span class="kw">partition by</span> fulfillment_type <span class="kw">order by</span> <span class="fn">sum</span>(...) <span class="kw">desc</span>) rank_by_fulfillment_type
+<span class="kw">from</span> sellers s ... <span class="kw">group by</span> s.seller_id, s.fulfillment_type, s.rating;</pre></div></div>
+
+    <div class="mb fw"><div class="mh"><p class="mt">Metric 5 — Customer LTV Segments</p><p class="md">High (≥AED 20K): 3 customers, AED 88,878. Mid: 4 customers, AED 53,074. Low (&lt;AED 10K): 3 customers, AED 15,520. The 3 High-value customers generate more revenue than the other 7 combined. <strong>Doughnut:</strong> revenue share by LTV segment.</p></div><div class="ca"><canvas id="cv-9-5"></canvas></div><button class="qt" onclick="tq(this)"><span>View SQL</span><span class="qi">▾</span></button><div class="qc"><pre><span class="cm">-- METRIC 5: CUSTOMER LTV SEGMENTS</span>
+<span class="kw">with</span> cte <span class="kw">as</span> (
+  <span class="kw">select</span> o.customer_id,
+    <span class="fn">sum</span>(<span class="kw">case when</span> o.status=<span class="st">'delivered'</span> <span class="kw">then</span> oi.quantity*oi.unit_price <span class="kw">else</span> 0 <span class="kw">end</span>) revenue,
+    <span class="kw">case when</span> <span class="fn">sum</span>(...) &lt; 10000 <span class="kw">then</span> <span class="st">'Low'</span>
+         <span class="kw">when</span> <span class="fn">sum</span>(...) &gt;= 20000 <span class="kw">then</span> <span class="st">'High'</span> <span class="kw">else</span> <span class="st">'Mid'</span> <span class="kw">end</span> segment
+  <span class="kw">from</span> orders o <span class="kw">join</span> order_items oi ... <span class="kw">group by</span> o.customer_id
+)
+<span class="kw">select</span> segment, <span class="fn">sum</span>(revenue), <span class="fn">count</span>(customer_id), <span class="fn">round</span>(<span class="fn">avg</span>(revenue),2)
+<span class="kw">from</span> cte <span class="kw">group by</span> segment;</pre></div></div>
+  </div>
+</section>
+
+<!-- SANDBOX -->
+<section class="sandbox" id="sandbox">
+  <h2 class="sb-title">Query <em style="font-style:italic;color:var(--accent)">Sandbox</em></h2>
+  <p class="sb-desc">Run any query in DB Fiddle, paste the tab-separated output here, pick a chart type, and render. Col numbering starts at 0.</p>
+  <div class="sbgrid">
+    <div class="sbia">
+      <div class="sblbl"><span>Paste DB Fiddle Output</span><span style="font-size:10px;color:var(--muted2)">Tab-sep · First row = headers</span></div>
+      <textarea class="sbp" id="sb-in" placeholder="Paste output here...&#10;&#10;Example:&#10;category&#9;revenue&#10;Electronics&#9;45200&#10;Fashion&#9;12800"></textarea>
+      <div class="col-inputs">
+        <div class="cig"><span class="cil">Label Col #</span><input class="ci" type="number" id="sb-lc" value="0" min="0"></div>
+        <div class="cig"><span class="cil">Value Col #</span><input class="ci" type="number" id="sb-vc" value="1" min="0"></div>
+        <div class="cig"><span class="cil">2nd Value</span><input class="ci" type="number" id="sb-vc2" placeholder="opt"></div>
+        <div class="cig"><span class="cil">Title</span><input class="ci wide" type="text" id="sb-title" value="My Query"></div>
+      </div>
+      <div class="sbact">
+        <button class="bup" onclick="rSB()">Render Chart</button>
+        <button class="bcl" onclick="cSB()">Clear</button>
+        <span class="us" id="s-sb"><span class="sd"></span>Rendered</span>
+      </div>
+    </div>
+    <div class="sbca">
+      <div class="sbci" id="sb-chart"><div class="cp"><div class="cp-icon">⬡</div><p>Chart renders here</p></div></div>
+      <div class="sbcc">
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-right:6px">Type</span>
+        <button class="stb active" onclick="setST('bar',this)">Bar</button>
+        <button class="stb" onclick="setST('hbar',this)">H-Bar</button>
+        <button class="stb" onclick="setST('line',this)">Line</button>
+        <button class="stb" onclick="setST('doughnut',this)">Doughnut</button>
+        <button class="stb" onclick="setST('dual',this)">Dual Line</button>
+        <button class="stb" onclick="setST('multiline',this)">Multi-Line</button>
+        <button class="stb" onclick="setST('table',this)">Table</button>
+      </div>
+      <div class="sbhint">Col # starts at 0 · Tab-separated · Include header row · Multi-Line: Label Col = series name, Value Col = x-axis, 2nd Value = metric</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="fl">Built on <em style="font-style:italic;color:var(--accent)">PostgreSQL.</em><br>Deployed on GitHub Pages.</div>
+  <div class="fr">
+    <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Charting Stack</span><br>
+    Chart.js · PapaParse · Vanilla JS · GitHub Pages<br>
+    <span style="color:var(--muted2)">SQL produces tabular data. Chart.js reads<br>parsed arrays and renders to canvas.</span>
+  </div>
+</footer>
+
+<script>
+const CR={};
+let sbT='bar';
+const C=['#e8ff47','#ff6b35','#00d4ff','#a78bfa','#22c55e','#f97316','#ef4444','#22d3ee'];
+
+// ── helpers ──
+function mkChart(id,type,labels,values,colors,horiz){
+  const el=document.getElementById('cv-'+id);if(!el)return;
+  if(CR[id]){try{CR[id].destroy();}catch(e){}}
+  const ctx=el.getContext('2d');
+  const isDo=type==='doughnut'||type==='pie';
+  CR[id]=new Chart(ctx,{
+    type,
+    data:{labels,datasets:[{label:'',data:values,
+      backgroundColor:isDo?colors:colors.map(c=>c+'cc'),
+      borderColor:isDo?colors:colors[0],
+      borderWidth:type==='line'?2:1,fill:false,tension:0.4,
+      pointBackgroundColor:colors[0],pointRadius:type==='line'?4:0}]},
+    options:{indexAxis:horiz?'y':'x',responsive:true,
+      plugins:{legend:{display:isDo,labels:{color:'#777',font:{family:'DM Mono',size:11}}},title:{display:false}},
+      scales:isDo?{}:{
+        x:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}},
+        y:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}}
+      }}
+  });
+}
+
+function mkDual(id,labels,v1,v2,l1,l2){
+  const el=document.getElementById('cv-'+id);if(!el)return;
+  if(CR[id]){try{CR[id].destroy();}catch(e){}}
+  const ctx=el.getContext('2d');
+  const ds=[{label:l1,data:v1,borderColor:'#e8ff47',backgroundColor:'transparent',tension:0.4,pointRadius:4,pointBackgroundColor:'#e8ff47'}];
+  if(v2&&v2.some(x=>x!==null))ds.push({label:l2,data:v2,borderColor:'#ff6b35',backgroundColor:'transparent',borderDash:[5,5],tension:0.4,pointRadius:4,pointBackgroundColor:'#ff6b35'});
+  CR[id]=new Chart(ctx,{type:'line',data:{labels,datasets:ds},
+    options:{responsive:true,plugins:{legend:{labels:{color:'#777',font:{family:'DM Mono',size:11}}}},
+      scales:{x:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}},y:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}}}}});
+}
+
+function mkMulti(id,labels,seriesObj){
+  const el=document.getElementById('cv-'+id);if(!el)return;
+  if(CR[id]){try{CR[id].destroy();}catch(e){}}
+  const ctx=el.getContext('2d');
+  const cats=Object.keys(seriesObj);
+  const ds=cats.map((cat,i)=>({label:cat,data:seriesObj[cat],borderColor:C[i%C.length],backgroundColor:'transparent',tension:0.4,pointRadius:3,spanGaps:false}));
+  CR[id]=new Chart(ctx,{type:'line',data:{labels,datasets:ds},
+    options:{responsive:true,plugins:{legend:{labels:{color:'#777',font:{family:'DM Mono',size:10}}}},
+      scales:{x:{ticks:{color:'#555',font:{family:'DM Mono',size:9}},grid:{color:'#181818'}},y:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}}}}});
+}
+
+function mkTable(id,headers,rows){
+  const el=document.getElementById('t-'+id);if(!el)return;
+  let h='<div class="tbl-note">⬡ Tabular output — multi-dimensional data</div><table class="dt"><thead><tr>';
+  headers.forEach(x=>h+=`<th>${x}</th>`);
+  h+='</tr></thead><tbody>';
+  rows.forEach(row=>{h+='<tr>';row.forEach(c=>h+=`<td>${c}</td>`);h+='</tr>';});
+  h+='</tbody></table>';
+  el.innerHTML=h;
+}
+
+function tq(btn){btn.classList.toggle('open');btn.nextElementSibling.classList.toggle('vis');}
+
+// ── auto-render all hardcoded charts on load ──
+window.addEventListener('DOMContentLoaded',()=>{
+  // P1
+  mkChart('1-1','bar',DATA.p1m1.labels,DATA.p1m1.values,['#e8ff47','#ff6b35','#00d4ff']);
+  mkChart('1-2','bar',DATA.p1m2.labels,DATA.p1m2.values,['#00d4ff','#00bfe0','#00aac0','#0095a0','#007f80'],true);
+  mkChart('1-3','doughnut',DATA.p1m3.labels,DATA.p1m3.values,['#22c55e','#ef4444','#ff6b35']);
+  mkChart('1-4','doughnut',DATA.p1m4.labels,DATA.p1m4.values,['#e8ff47','#ff6b35','#00d4ff']);
+
+  // P2
+  mkChart('2-1','line',DATA.p2m1.labels,DATA.p2m1.values,['#e8ff47']);
+  mkMulti('2-2',DATA.p2m2.months,DATA.p2m2.series);
+  mkChart('2-3','bar',DATA.p2m3.labels,DATA.p2m3.values,['#ff6b35','#e8ff47','#00d4ff']);
+
+  // P3
+  mkChart('3-1','line',DATA.p3m1.labels,DATA.p3m1.values,['#00d4ff']);
+  mkChart('3-2','bar',DATA.p3m2.labels,DATA.p3m2.values,['#e8ff47']);
+  mkTable('3-3',DATA.p3m3.headers,DATA.p3m3.rows);
+
+  // P4
+  mkTable('4-1',DATA.p4m1.headers,DATA.p4m1.rows);
+  mkChart('4-2','bar',DATA.p4m2.labels,DATA.p4m2.values,['#e8ff47','#ff6b35']);
+  mkChart('4-3','bar',DATA.p4m3.labels,DATA.p4m3.values,['#e8ff47','#ff6b35','#00d4ff'],true);
+
+  // P5
+  mkTable('5-1',DATA.p5m1.headers,DATA.p5m1.rows);
+  mkChart('5-2','bar',DATA.p5m2.labels,DATA.p5m2.values,['#22c55e']);
+  mkTable('5-3',DATA.p5m3.headers,DATA.p5m3.rows);
+
+  // P6
+  mkChart('6-1','bar',DATA.p6m1.labels,DATA.p6m1.values,['#ef4444','#f97316','#eab308','#22c55e','#00d4ff','#a78bfa','#ff6b35','#e8ff47','#8899aa','#444'],true);
+  mkChart('6-2','bar',DATA.p6m2.labels,DATA.p6m2.values,['#ef4444','#22c55e','#22c55e']);
+  mkTable('6-3',DATA.p6m3.headers,DATA.p6m3.rows);
+  mkChart('6-4','doughnut',DATA.p6m4.labels,DATA.p6m4.values,['#f97316','#ef4444','#eab308']);
+
+  // P7
+  mkChart('7-1','bar',DATA.p7m1.labels,DATA.p7m1.values,['#e8ff47','#ff6b35','#00d4ff']);
+  mkChart('7-2','bar',DATA.p7m2.labels,DATA.p7m2.values,['#ef4444','#22c55e','#22c55e']);
+  mkTable('7-3',DATA.p7m3.headers,DATA.p7m3.rows);
+  mkMulti('7-4',DATA.p7m4.months,DATA.p7m4.series);
+
+  // P8
+  mkChart('8-1','bar',DATA.p8m1.labels,DATA.p8m1.values,['#22c55e','#e8ff47','#ef4444']);
+  mkChart('8-2','bar',DATA.p8m2.labels,DATA.p8m2.values,['#e8ff47','#ff6b35','#00d4ff']);
+  mkChart('8-3','doughnut',DATA.p8m3.labels,DATA.p8m3.values,['#00d4ff','#444']);
+  mkDual('8-4',DATA.p8m4.months,DATA.p8m4.revenue,DATA.p8m4.growth,'Revenue (AED)','MoM Growth %');
+
+  // P9
+  mkTable('9-1',DATA.p9m1.headers,DATA.p9m1.rows);
+  mkDual('9-2',DATA.p9m2.labels,DATA.p9m2.revenue,DATA.p9m2.rolling,'Monthly Revenue','3-Month Rolling Avg');
+  mkTable('9-3',DATA.p9m3.headers,DATA.p9m3.rows);
+  mkTable('9-4',DATA.p9m4.headers,DATA.p9m4.rows);
+  mkChart('9-5','doughnut',DATA.p9m5.labels,DATA.p9m5.values,['#e8ff47','#ff6b35','#00d4ff']);
+});
+
+// ── SANDBOX ──
+function setST(type,btn){
+  sbT=type;
+  document.querySelectorAll('.stb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function getSBData(){
+  const raw=document.getElementById('sb-in').value.trim();
+  if(!raw)return null;
+  let r=Papa.parse(raw,{delimiter:'\t',skipEmptyLines:true});
+  if(!r.data||r.data.length<2)r=Papa.parse(raw,{delimiter:',',skipEmptyLines:true});
+  return r.data?.length>=2?r.data:null;
+}
+
+function fl(v){
+  if(!v)return v;
+  const m=String(v).match(/^(\d{4})-(\d{2})/);
+  if(m){const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return mn[parseInt(m[2])-1]+' '+m[1];}
+  return v;
+}
+function fv(v){return parseFloat(String(v).replace(/,/g,'').replace(/\s/g,''))||0;}
+
+function ss(id){const s=document.getElementById('s-'+id);if(s){s.classList.add('v');setTimeout(()=>s.classList.remove('v'),2500);}}
+
+function rSB(){
+  const data=getSBData();if(!data){alert('Paste output first');return;}
+  const lc=parseInt(document.getElementById('sb-lc').value)||0;
+  const vc=parseInt(document.getElementById('sb-vc').value)||1;
+  const vc2r=document.getElementById('sb-vc2').value;
+  const vc2=vc2r!==''?parseInt(vc2r):null;
+  const title=document.getElementById('sb-title').value||'My Query';
+  const rows=data.slice(1);
+  const inner=document.getElementById('sb-chart');
+
+  if(sbT==='table'){
+    const hd=data[0];let h='<div style="overflow-x:auto;width:100%"><table class="dt"><thead><tr>';
+    hd.forEach(x=>h+=`<th>${x}</th>`);h+='</tr></thead><tbody>';
+    rows.forEach(row=>{h+='<tr>';row.forEach(c=>h+=`<td>${c}</td>`);h+='</tr>';});
+    h+='</tbody></table></div>';inner.innerHTML=h;ss('sb');return;
+  }
+
+  if(sbT==='multiline'){
+    const cats=[...new Set(rows.map(r=>r[lc]))].filter(Boolean);
+    const allL=[...new Set(rows.map(r=>r[vc]))].sort();
+    const vcd=vc2!==null?vc2:vc+1;
+    const ds=cats.map((cat,i)=>{
+      const cr=rows.filter(r=>r[lc]===cat);const mm={};cr.forEach(r=>mm[r[vc]]=fv(r[vcd]));
+      return{label:cat,data:allL.map(l=>mm[l]||0),borderColor:C[i%C.length],backgroundColor:'transparent',tension:0.4,pointRadius:3};
+    });
+    inner.innerHTML='<canvas id="cv-sb"></canvas>';
+    if(CR['sb']){try{CR['sb'].destroy();}catch(e){}}
+    const ctx=document.getElementById('cv-sb').getContext('2d');
+    CR['sb']=new Chart(ctx,{type:'line',data:{labels:allL.map(fl),datasets:ds},
+      options:{responsive:true,plugins:{legend:{labels:{color:'#777',font:{family:'DM Mono',size:10}}}},
+        scales:{x:{ticks:{color:'#555',font:{family:'DM Mono',size:9}},grid:{color:'#181818'}},y:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}}}}});
+    ss('sb');return;
+  }
+
+  if(sbT==='dual'){
+    const labels=rows.map(r=>fl(r[lc]));
+    const v1=rows.map(r=>fv(r[vc]));
+    const vc2col=vc2!==null?vc2:vc+1;
+    const v2=rows.map(r=>r[vc2col]!==undefined?fv(r[vc2col]):null);
+    const ds=[{label:data[0][vc]||'Value 1',data:v1,borderColor:'#e8ff47',backgroundColor:'transparent',tension:0.4,pointRadius:4,pointBackgroundColor:'#e8ff47'}];
+    if(v2.some(v=>v!==null))ds.push({label:data[0][vc2col]||'Value 2',data:v2,borderColor:'#ff6b35',backgroundColor:'transparent',borderDash:[5,5],tension:0.4,pointRadius:4,pointBackgroundColor:'#ff6b35'});
+    inner.innerHTML='<canvas id="cv-sb"></canvas>';
+    if(CR['sb']){try{CR['sb'].destroy();}catch(e){}}
+    const ctx=document.getElementById('cv-sb').getContext('2d');
+    CR['sb']=new Chart(ctx,{type:'line',data:{labels,datasets:ds},
+      options:{responsive:true,plugins:{legend:{labels:{color:'#777',font:{family:'DM Mono',size:11}}}},
+        scales:{x:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}},y:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}}}}});
+    ss('sb');return;
+  }
+
+  const labels=rows.map(r=>fl(r[lc]));
+  const values=rows.map(r=>fv(r[vc]));
+  const isD=sbT==='doughnut';
+  const isH=sbT==='hbar';
+  const ct2=isH?'bar':sbT;
+  inner.innerHTML='<canvas id="cv-sb"></canvas>';
+  if(CR['sb']){try{CR['sb'].destroy();}catch(e){}}
+  const ctx=document.getElementById('cv-sb').getContext('2d');
+  CR['sb']=new Chart(ctx,{type:ct2,
+    data:{labels,datasets:[{label:title,data:values,
+      backgroundColor:isD?C:C.map(c=>c+'cc'),borderColor:isD?C:C[0],
+      borderWidth:ct2==='line'?2:1,fill:false,tension:0.4,
+      pointBackgroundColor:C[0],pointRadius:ct2==='line'?4:0}]},
+    options:{indexAxis:isH?'y':'x',responsive:true,
+      plugins:{legend:{display:isD,labels:{color:'#777',font:{family:'DM Mono',size:11}}}},
+      scales:isD?{}:{x:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}},y:{ticks:{color:'#555',font:{family:'DM Mono',size:10}},grid:{color:'#181818'}}}}});
+  ss('sb');
+}
+
+function cSB(){
+  if(CR['sb']){try{CR['sb'].destroy();}catch(e){}}
+  document.getElementById('sb-in').value='';
+  document.getElementById('sb-chart').innerHTML='<div class="cp"><div class="cp-icon">⬡</div><p>Chart renders here</p></div>';
+  const s=document.getElementById('s-sb');if(s)s.classList.remove('v');
+}
+
+document.querySelectorAll('.toc-link').forEach(link=>{
+  link.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector(link.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>
